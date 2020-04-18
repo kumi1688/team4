@@ -7,19 +7,20 @@ var cors = require('cors');
 
 var lights = require('./routes/light'); //light 라우터
 
-//socket.io 부분
-// app.io = require("socket.io")();
-// const socket = app.io.on("connection", function () {
-//   console.log("웹 소켓 연결됨");
+// socket.io 부분
 
-//   let count = 0;
-//   setInterval(() => {
+app.io = require("socket.io")();
+const socket = app.io.on("connection", function () {
+  console.log("웹 소켓 연결됨");
 
-//     socket.emit("bulbState", {
-//       data: `전구 상태 : ${count++}`,
-//     });
-//   }, 2000);
-// });
+  let count = 0;
+  setInterval(() => {
+
+    socket.emit("bulbState", {
+      data: `전구 상태 : ${count++}`,
+    });
+  }, 2000);
+});
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
@@ -33,7 +34,7 @@ var server = http.listen(8080, function () {
   console.log("Server Created...");
 });
 
-// app.io.attach(server);
+app.io.attach(server);
 
 //Close
 process.on("SIGINT", function () {
