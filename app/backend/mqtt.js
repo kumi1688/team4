@@ -8,6 +8,7 @@ const options = {
 let subscribeList = [
     'res/hue/property', // 속성 정보 요청 응답
     'res/hue/status', // 현재 상태 정보 요청 응답
+    'res/hue/status/update' // hue 쪽에서 상태값이 변경될 때 마다 상태값 받음
 ];
 // publish 할 topic 목록
 let publishList = [
@@ -18,8 +19,9 @@ let publishList = [
 
 // hue 속성
 let hueProperty = {};
-// hue 상태
+// hue 현재 상태
 let hueStatus = [];
+
 
 //mqtt 연결
 const client = mqtt.connect(options);
@@ -45,6 +47,10 @@ client.on('message', (topic, message)=>{
         hueProperty = JSON.parse(message);
     }else if (topic === 'res/hue/status'){
         hueStatus = JSON.parse(message);
+    }else if (topic === 'res/hue/status/update'){
+        console.log('update');
+        hueStatus = JSON.parse(message);
+        
     }
 })
 
@@ -69,6 +75,7 @@ function requestHueData(pubTopic, pubMessage){
         });
     })
 }
+
 
 module.exports = {
     client, 

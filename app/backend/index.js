@@ -4,23 +4,9 @@ var http = require('http').createServer(app);
 var path = require('path');
 var bodyParser = require('body-parser');
 var cors = require('cors');
+const websocket = require('./socket');
 
 var lights = require('./routes/light'); //light 라우터
-
-// socket.io 부분
-
-app.io = require("socket.io")();
-const socket = app.io.on("connection", function () {
-  console.log("웹 소켓 연결됨");
-
-  let count = 0;
-  setInterval(() => {
-
-    socket.emit("bulbState", {
-      data: `전구 상태 : ${count++}`,
-    });
-  }, 2000);
-});
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
@@ -34,11 +20,10 @@ var server = http.listen(8080, function () {
   console.log("Server Created...");
 });
 
-app.io.attach(server);
+websocket(server, app);
 
 //Close
 process.on("SIGINT", function () {
-  client.end()
   console.log("Get SIGINT!\n")
   process.exit()
 })
