@@ -2,69 +2,63 @@ const PHILIPS_HUE_MAX_VALUE = 65535;
 const PHILIPS_SATURATION_MAX_VALUE = 254;
 const PHILIPS_BRIGHTNESS_MAX_VALUE = 254;
 
-
 // let rgbColor = this.hsvToRgb(Math.round(hue), Math.round(saturation) / 100, Math.round(brightness) / 100)
 
-function HSBToRGB(hsb) {
-    var rgb = {};
-    var h = Math.round(hsb.h);
-    var s = Math.round(hsb.s * 255 / 100);
-    var v = Math.round(hsb.b * 255 / 100);
+var colorNormalizedToEightBit = function(value) {
+  return Math.round(value * 255);
+};
 
-    if (s == 0) {
+var hsbToRgb = function(hue, sat, value) {
+  var satNormal = sat / 255,
+    valueNormal = value / 255,
+    hueNormal = (hue / 65535) * 360,
+    c = valueNormal * satNormal,
+    x = c * (1 - Math.abs(((hueNormal / 60) % 2) - 1)),
+    m = valueNormal - c,
+    red = 0,
+    green = 0,
+    blue = 0;
+  if (hueNormal >= 0 && hueNormal < 60) {
+    red = c;
+    green = x;
+    blue = 0;
+  } else if (hueNormal >= 60 && hueNormal < 120) {
+    red = x;
+    green = c;
+    blue = 0;
+  } else if (hueNormal >= 120 && hueNormal < 180) {
+    red = 0;
+    green = c;
+    blue = x;
+  } else if (hueNormal >= 180 && hueNormal < 240) {
+    red = 0;
+    green = x;
+    blue = c;
+  } else if (hueNormal >= 240 && hueNormal < 300) {
+    red = x;
+    green = 0;
+    blue = c;
+  } else {
+    red = c;
+    green = 0;
+    blue = x;
+  }
+  return [
+    colorNormalizedToEightBit(red + m),
+    colorNormalizedToEightBit(green + m),
+    colorNormalizedToEightBit(blue + m),
+  ];
+};
 
-        rgb.r = rgb.g = rgb.b = v;
-    } else {
-        var t1 = v;
-        var t2 = (255 - s) * v / 255;
-        var t3 = (t1 - t2) * (h % 60) / 60;
-
-        if (h == 360) h = 0;
-
-        if (h < 60) {
-            rgb.r = t1;
-            rgb.b = t2;
-            rgb.g = t2 + t3
-        } else if (h < 120) {
-            rgb.g = t1;
-            rgb.b = t2;
-            rgb.r = t1 - t3
-        } else if (h < 180) {
-            rgb.g = t1;
-            rgb.r = t2;
-            rgb.b = t2 + t3
-        } else if (h < 240) {
-            rgb.b = t1;
-            rgb.r = t2;
-            rgb.g = t1 - t3
-        } else if (h < 300) {
-            rgb.b = t1;
-            rgb.g = t2;
-            rgb.r = t2 + t3
-        } else if (h < 360) {
-            rgb.r = t1;
-            rgb.g = t2;
-            rgb.b = t1 - t3
-        } else {
-            rgb.r = 0;
-            rgb.g = 0;
-            rgb.b = 0
-        }
-    }
-
-    return {r: Math.round(rgb.r), g: Math.round(rgb.g), b: Math.round(rgb.b)};
-}
-
-function rgbToHsvString(rgb){ 
-    
-    const {r,g,b} = rgb.rgba;
-    const result = rgbToHsv(r, g, b);
-    const currentHSB = {
-        hue: parseInt(result[0], 10),
-        sat: parseInt(result[1], 10),
-        bri: parseInt(result[2], 10)
-    };
-    return currentHSB;
+function rgbToHsvString(rgb) {
+  const { r, g, b } = rgb.rgba;
+  const result = rgbToHsv(r, g, b);
+  const currentHSB = {
+    hue: parseInt(result[0], 10),
+    sat: parseInt(result[1], 10),
+    bri: parseInt(result[2], 10),
+  };
+  return currentHSB;
 }
 
 function rgbToHsv(r, g, b) {
@@ -102,8 +96,8 @@ function rgbToHsv(r, g, b) {
   return [
     Math.round(h * 360) * (PHILIPS_HUE_MAX_VALUE / 360),
     Math.round(s * 100) * (PHILIPS_SATURATION_MAX_VALUE / 100),
-    Math.round(v * 100) * (PHILIPS_BRIGHTNESS_MAX_VALUE / 100)
+    Math.round(v * 100) * (PHILIPS_BRIGHTNESS_MAX_VALUE / 100),
   ];
 }
 
-export { rgbToHsv, HSBToRGB, rgbToHsvString };
+export { rgbToHsv, hsbToRgb, rgbToHsvString };
