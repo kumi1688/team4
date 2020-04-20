@@ -1,6 +1,6 @@
 const mqtt = require("mqtt");
 const options = {
-  host: "192.168.0.2",
+  host: "13.125.207.178",
   port: 1883,
   protocol: "mqtt",
 };
@@ -42,20 +42,24 @@ client.publish("req/hue/status", "");
 
 client.on("message", (topic, message) => {
   console.log("topic : ", topic);
-  if (topic === "res/hue/property") {
+  if (topic === "res/hue/property") { // 속성 전송
     hueProperty = JSON.parse(message);
-  } else if (topic === "res/hue/status") {
+  } else if (topic === "res/hue/status") { // 초기 상태 전송
     hueStatus = JSON.parse(message);
   }
 });
 
+// 현재 속성값 전달. 
 function getHueProperty() {
   return hueProperty;
 }
+
+// 현재 상태값 전달. 비동기 처리가 되지 않아 최신 정보 아닐 수 있음
 function getHueStatus() {
   return hueStatus;
 }
 
+// 현재 상태값 받아오는 함수. 비동기 처리로 데이터를 받아옴
 function requestHueData(pubTopic, pubMessage) {
   return new Promise((resolve, reject) => {
     client.publish(pubTopic, pubMessage, {}, () => {
@@ -78,5 +82,5 @@ module.exports = {
   client,
   getHueProperty, // 속성 정보 요청
   getHueStatus, // 현재 상태 정보 요청 (정보가 최신이 아닐 수 있음)
-  requestHueData, // 현재 상태 정보 요청 (최신 정보 받아옴)
+  requestHueData, // 현재 상태 정보 요청. 비동기 처리 (최신 정보 받아옴)
 };

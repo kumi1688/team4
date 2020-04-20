@@ -3,10 +3,10 @@
     <v-card class="mx-auto" max-width="250">
       <v-card-text>
         <h2>Hue {{ hueData.number }}</h2>
-        <v-avatar color="blue" size="200">
+        <v-avatar color="green" size="200">
           <span class="white--text headline"></span>
         </v-avatar>
-        <h2>{{ currentPower ? "켜짐" : "꺼짐" }}</h2>
+        <h2>{{ hueData.on ? "켜짐" : "꺼짐" }}</h2>
       </v-card-text>
 
       <v-card-actions class="btn">
@@ -14,7 +14,7 @@
           v-model="menu"
           :close-on-content-click="false"
           :nudge-width="200"
-          offset-x
+          left
         >
           <template v-slot:activator="{ on }">
             <v-btn color="indigo" dark v-on="on">
@@ -38,7 +38,9 @@
               v-model="currentTemperature"
               min="153"
               max="500"
-              label="색 온도"
+              thumb-label="always"
+              prepend-icon="mdi-alarm-light"
+              append-icon='mdi-alarm-light-outline'
             ></v-slider>
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -50,9 +52,10 @@
         </v-menu>
         <v-menu
           v-model="menu2"
-          :close-on-content-click="false"
+          :close-on-content-click="true"
+          :close-on-click="false"
           :nudge-width="200"
-          offset-x
+          right
         >
           <template v-slot:activator="{ on }">
             <v-btn color="indigo" dark v-on="on">
@@ -66,60 +69,14 @@
           </template>
 
           <v-card>
-            <h2>hue : {{ currentHSB.hue }}</h2>
-            <h2>saturation : {{ currentHSB.sat }}</h2>
-            <h2>brightness : {{ currentHSB.bri }}</h2>
-            <h2>온도 : {{ currentTemperature }}</h2>
+            <h2>hue : {{ hueData.hue }}</h2>
+            <h2>saturation : {{ hueData.sat }}</h2>
+            <h2>brightness : {{ hueData.bri }}</h2>
+            <h2>온도 : {{ hueData.ct }}</h2>
           </v-card>
         </v-menu>
       </v-card-actions>
     </v-card>
-
-    <!-- <v-row justify="space-around">
-      <v-col cols="6">
-        <v-row>
-          <v-col>
-            <h2>{{ hueData.number }}번 전구 설정</h2>
-          </v-col>
-          <v-col>
-            <v-btn @click="switchPower">{{
-              this.currentPower ? "켜기" : "끄기"
-            }}</v-btn>
-            <v-avatar color="blue" size="size">
-              <span class="white--text headline">62</span>
-            </v-avatar>
-          </v-col>
-        </v-row>
-        <v-color-picker
-          @input="setColor"
-          canvas-height="200"
-          width="600"
-          class="ma-2"
-          hide-mode-switch
-          light
-          v-model="currentRGB"
-        />
-        <v-slider
-          sm="3"
-          v-model="currentTemperature"
-          min="153"
-          max="500"
-          label="색 온도"
-        ></v-slider>
-      </v-col>
-      <v-col>
-        <h2>현재 정보</h2>
-
-        <v-btn @click="switchPower">{{
-          this.currentPower ? "켜기" : "끄기"
-        }}</v-btn>
-
-        <h2>hue : {{ currentHSB.hue }}</h2>
-        <h2>saturation : {{ currentHSB.sat }}</h2>
-        <h2>brightness : {{ currentHSB.bri }}</h2>
-        <h2>온도 : {{ currentTemperature }}</h2>
-      </v-col>
-    </v-row> -->
   </v-container>
 </template>
 
@@ -130,6 +87,7 @@ import axios from "axios";
 export default {
   props: ["hueData", "num"],
   created() {
+    console.log(this.hueData);
     this.currentPower = this.hueData.on;
     this.currentTemperature = this.hueData.ct;
     this.currentHSB = {
@@ -185,6 +143,7 @@ export default {
       updateStatus: true,
       menu: false,
       menu2: false,
+      color: '#033'
     };
   },
 };

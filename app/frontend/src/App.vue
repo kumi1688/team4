@@ -133,9 +133,14 @@ import HueContainer from './components/hue/HueContainer'
     components: {
       'hue-container': HueContainer
     },
+    watch:{
+      drawer(){
+        console.log(this.drawer);
+      }
+    },
     data: () => ({
       dialog: false,
-      drawer: null,
+      drawer: false,
       items: [
         { icon: 'mdi-lightbulb', text: 'Hue 제어' },
         {
