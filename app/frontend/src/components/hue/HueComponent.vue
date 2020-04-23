@@ -3,7 +3,7 @@
     <v-card class="mx-auto" max-width="250">
       <v-card-text>
         <h2>Hue {{ hueData.number }}</h2>
-        <v-avatar color="green" size="200">
+        <v-avatar :color="this.hueData.colorToString" size="200">
           <span class="white--text headline"></span>
         </v-avatar>
         <h2>{{ hueData.on ? "켜짐" : "꺼짐" }}</h2>
@@ -40,7 +40,7 @@
               max="500"
               thumb-label="always"
               prepend-icon="mdi-alarm-light"
-              append-icon='mdi-alarm-light-outline'
+              append-icon="mdi-alarm-light-outline"
             ></v-slider>
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -81,7 +81,7 @@
 </template>
 
 <script>
-import { rgbToHsvString } from "./rgbToHsv";
+import { rgbToHsvString, hsbToRgb } from "./rgbToHsv";
 import axios from "axios";
 
 export default {
@@ -95,16 +95,12 @@ export default {
       sat: this.hueData.sat,
       bri: this.hueData.bri,
     };
+    const rgb = hsbToRgb(this.hueData.hue, this.hueData.sat, this.hueData.bri);
+    this.color = rgb;
     this.loading = false;
   },
   watch: {
     currentHSB() {
-      // const rgb = hsbToRgb(
-      //   this.currentHSB.hue,
-      //   this.currentHSB.sat,
-      //   this.currentHSB.bri
-      // );
-      // console.log(rgb);
       // this.updateStatus = false;
     },
     currentPower() {
@@ -113,6 +109,13 @@ export default {
     },
     currentTemperature() {
       // this.updateStatus = false;
+    },
+    color() {
+      console.log(this.color);
+      // 34 190 80
+    },
+    colortoString() {
+      console.log(this.colortoString);
     },
   },
   methods: {
@@ -143,7 +146,8 @@ export default {
       updateStatus: true,
       menu: false,
       menu2: false,
-      color: '#033'
+      color: "#033",
+      colortoString: "",
     };
   },
 };

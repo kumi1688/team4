@@ -49,6 +49,21 @@ export default {
     async getHueStatus() {
       const result = await axios.get("/api/light/status");
       this.hueDataAll = result.data;
+      this.hueDataAll.forEach(function(element) {
+        const { hue, bri, sat } = element;
+
+        let arr = [];
+        if (hue < 16) arr = [...arr, "0" + hue.toString(16)];
+        else arr = [...arr, hue.toString(16)];
+
+        if (sat < 16) arr = [...arr, "0" + sat.toString(16)];
+        else arr = [...arr, sat.toString(16)];
+
+        if (bri < 16) arr = [...arr, "0" + bri.toString(16)];
+        else arr = [...arr, bri.toString(16)];
+
+        element.colorToString = "#" + arr.join("");
+      });
       console.log("[sys] hue status 초기 설정 완료");
     },
     compareState(updateData) {
@@ -60,6 +75,20 @@ export default {
           element.sat = updateData.sat;
           element.hue = updateData.hue;
           element.on = updateData.on;
+
+          const { hue, bri, sat } = element;
+
+          let arr = [];
+          if (hue < 16) arr = [...arr, "0" + hue.toString(16)];
+          else arr = [...arr, hue.toString(16)];
+
+          if (sat < 16) arr = [...arr, "0" + sat.toString(16)];
+          else arr = [...arr, sat.toString(16)];
+
+          if (bri < 16) arr = [...arr, "0" + bri.toString(16)];
+          else arr = [...arr, bri.toString(16)];
+
+          element.colorToString = "#" + arr.join("");
         }
       });
       //   console.log(this.hueDataAll);
