@@ -3,7 +3,7 @@ var router = express.Router();
 const {
   getHueProperty,
   getHueStatus,
-  requestHueData,
+  requestData,
   client,
 } = require("../mqtt");
 
@@ -16,7 +16,7 @@ router.get("/property", async function (req, res) {
 
 // 현재 상태 전달
 router.get("/status", async function (req, res) {
-  const result = await requestHueData("req/hue/status");
+  const result = await requestData("req/hue/status");
   // 웹소켓 연결
   // const io = req.app.get('io');
   // const result = getHueStatus();
