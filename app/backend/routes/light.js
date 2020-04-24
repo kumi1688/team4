@@ -1,11 +1,6 @@
 var express = require("express");
 var router = express.Router();
-const {
-  getHueProperty,
-  getHueStatus,
-  requestData,
-  client,
-} = require("../mqtt");
+const { getHueProperty, requestData, client } = require("../mqtt");
 
 // 속성 전달
 router.get("/property", async function (req, res) {
@@ -17,11 +12,12 @@ router.get("/property", async function (req, res) {
 // 현재 상태 전달
 router.get("/status", async function (req, res) {
   const result = await requestData("req/hue/status");
+  console.log(result);
+  res.send(result);
   // 웹소켓 연결
   // const io = req.app.get('io');
   // const result = getHueStatus();
   // io.of('/hue').emit('hue', result)
-  res.send(result);
 });
 
 // 상태 변경

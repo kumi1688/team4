@@ -2,9 +2,7 @@
   <v-container v-if="!loading">
     <v-row>
       <v-content v-for="(hueData, index) in hueDataAll" :key="index">
-        <hue-component :hueData="hueData" v-if="isUpdate"
-          >hue container</hue-component
-        >
+        <hue-component :hueData="hueData" v-if="isUpdate">hue container</hue-component>
       </v-content>
     </v-row>
   </v-container>
@@ -19,7 +17,7 @@ import HueComponent from "./HueComponent";
 
 export default {
   components: {
-    "hue-component": HueComponent,
+    "hue-component": HueComponent
   },
   async created() {
     await this.getHueProperty();
@@ -36,7 +34,7 @@ export default {
       });
     },
     updateHueState() {
-      socket.on("update", (data) => {
+      socket.on("update", data => {
         console.log("업데이트 됨", JSON.parse(data));
         this.compareState(JSON.parse(data));
       });
@@ -68,7 +66,7 @@ export default {
     },
     compareState(updateData) {
       this.isUpdate = false;
-      this.hueDataAll.map((element) => {
+      this.hueDataAll.map(element => {
         if (element.number === updateData.number) {
           element.ct = updateData.ct;
           element.bri = updateData.bri;
@@ -93,15 +91,15 @@ export default {
       });
       //   console.log(this.hueDataAll);
       this.isUpdate = true;
-    },
+    }
   },
   data() {
     return {
       loading: true,
       property: null,
       hueDataAll: [],
-      isUpdate: true,
+      isUpdate: true
     };
-  },
+  }
 };
 </script>
