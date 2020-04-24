@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="mx-auto">
     <v-list-item v-for="(item, index) in items" :key="index">
       <v-list-item-icon>
         <v-icon>{{item.icon}}</v-icon>

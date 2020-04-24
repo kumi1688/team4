@@ -46,9 +46,11 @@
 
 <script>
 export default {
+  watch: {},
   data() {
     return {
       dialog: false,
+      drawer: false,
       items: [
         { icon: "mdi-lightbulb", text: "Hue 제어", route: "/hue" },
         { icon: "mdi-apple-icloud", text: "날씨 확인", route: "/weather" },

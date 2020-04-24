@@ -16,12 +16,15 @@
       </v-row>
     </v-card-text>
 
-    <v-content v-if="!loading">
-      <weather-list-element :selectedData="selectedData" />
-    </v-content>
-    <v-content v-if="!loading">
-      <h2>야호</h2>
-    </v-content>
+    <v-container class="mx-auto">
+      <v-list-item v-for="(item, index) in items" :key="index">
+        <v-list-item-icon>
+          <v-icon>{{item.icon}}</v-icon>
+        </v-list-item-icon>
+        <v-list-item-subtitle>{{item.name}}</v-list-item-subtitle>
+        <v-list-item-subtitle>{{item.value}}{{item.unit}}</v-list-item-subtitle>
+      </v-list-item>
+    </v-container>
 
     <v-slider
       v-model="selectedTime"
@@ -41,12 +44,8 @@
 </template>
 
 <script>
-import WeatherListElement from "./weatherListElement";
-
 export default {
-  components: {
-    "weather-list-element": WeatherListElement
-  },
+  components: {},
   props: ["weatherData", "province", "city", "town"],
   created() {
     console.log(this.weatherData);
@@ -70,10 +69,45 @@ export default {
             .join("") + "시"
       )
     };
+    this.setData();
+    let items = [];
+    this.selectedData.map(data => {
+      items = [
+        ...items,
+        {
+          name: this.getName(data[0].toLowerCase()),
+          unit: this.getUnit(data[0].toLowerCase()),
+          icon: this.getIcon(data[0].toLowerCase()),
+          value: data[1]
+        }
+      ];
+    });
+
+    this.items = items;
   },
   watch: {
     selectedTime() {
-      this.loading = true;
+      this.setData();
+      let items = [];
+      this.selectedData.map(data => {
+        items = [
+          ...items,
+          {
+            name: this.getName(data[0].toLowerCase()),
+            unit: this.getUnit(data[0].toLowerCase()),
+            icon: this.getIcon(data[0].toLowerCase()),
+            value: data[1]
+          }
+        ];
+      });
+      this.items = items;
+    },
+    selectedData() {
+      console.log(this.selectedData);
+    }
+  },
+  methods: {
+    setData() {
       const result = this.weatherData.data.find(
         wd => wd.item[0].baseTime === this.timeData.timeList[this.selectedTime]
       );
@@ -82,12 +116,199 @@ export default {
         element.fcstValue
       ]);
       this.selectedData = result2.splice(0, 9);
-      this.loading = false;
     },
-    selectedData() {
-      this.loading = true;
-      console.log(this.selectedData);
-      this.loading = false;
+    getValue(code, fcstValue) {
+      let value = null;
+      switch (code) {
+        case "pty": {
+          // 없음(0), 비(1), 비/눈(2), 눈(3), 소나기(4)
+          switch (fcstValue) {
+            case 0:
+              value = "맑음";
+              break;
+            case 1:
+              value = "비";
+              break;
+            case 2:
+              value = "비/눈";
+              break;
+            case 3:
+              value = "눈";
+              break;
+            case 4:
+              value = "소나기";
+              break;
+          }
+          break;
+        }
+        case "sky": {
+          // 맑음(1), 구름많음(3), 흐림(4)
+          switch (fcstValue) {
+            case 1:
+              value = "맑음";
+              break;
+            case 3:
+              value = "구름 많음";
+              break;
+            case 4:
+              value = "흐림";
+              break;
+          }
+          break;
+        }
+        case "vec": {
+          // (풍향값 + 22.5 * 0.5) / 22.5) = 변환값(소수점 이하 버림)
+          const standard = (fcstValue + 22.5 * 0.5) / 22.5;
+          console.log(standard);
+          switch (standard) {
+            case 0:
+              value = "N";
+              break;
+            case 1:
+              value = "NNE";
+              break;
+            case 2:
+              value = "NE";
+              break;
+            case 3:
+              value = "ENE";
+              break;
+            case 4:
+              value = "E";
+              break;
+            case 5:
+              value = "ESE";
+              break;
+            case 6:
+              value = "SE";
+              break;
+            case 7:
+              value = "SSE";
+              break;
+            case 8:
+              value = "S";
+              break;
+            case 9:
+              value = "SSW";
+              break;
+            case 10:
+              value = "SW";
+              break;
+            case 11:
+              value = "WSW";
+              break;
+            case 12:
+              value = "W";
+              break;
+            case 13:
+              value = "WNW";
+              break;
+            case 14:
+              value = "NW";
+              break;
+            case 15:
+              value = "NNW";
+              break;
+            case 16:
+              value = "N";
+              break;
+          }
+          break;
+        }
+        case "pop":
+        case "reh":
+        case "s06":
+        case "t3h":
+        case "tmn":
+        case "tmx":
+        case "uuu":
+        case "vvv":
+        case "wav":
+        case "wsd":
+          value = fcstValue;
+          break;
+      }
+      return value;
+    },
+    getName(code) {
+      switch (code) {
+        case "pop":
+          return "강수확률";
+        case "pty":
+          return "강수형태";
+        case "reh":
+          return "습도";
+        case "s06":
+          return "적설량";
+        case "sky":
+          return "하늘상태";
+        case "t3h":
+          return "기온";
+        case "tmn":
+          return "아침 최저기온";
+        case "tmx":
+          return "낮 최고기온";
+        case "uuu":
+          return "풍속(동서)";
+        case "vvv":
+          return "풍속(남북)";
+        case "wav":
+          return "파고";
+        case "vec":
+          return "풍향";
+        case "wsd":
+          return "풍속";
+      }
+    },
+
+    getUnit(code) {
+      switch (code) {
+        case "r06":
+          return "mm";
+        case "pop":
+        case "reh":
+          return "%";
+        case "pty":
+        case "sky":
+        case "vec":
+          return null;
+        case "t3h":
+        case "tmn":
+        case "tmx":
+          return "℃";
+        case "wav":
+          return "m";
+        case "uuu":
+        case "vvv":
+        case "wsd":
+          return "m/s";
+      }
+    },
+    getIcon(code) {
+      switch (code) {
+        case "pop":
+          return "mdi-weather-pouring";
+        case "pty":
+          return "mdi-weather-partly-snowy-rainy";
+        case "reh":
+          return "mdi-water";
+        case "s06":
+          return "mdi-snowflake";
+        case "sky":
+          return "mdi-weather-snowy-rainy";
+        case "t3h":
+          return "mdi-temperature-celsius";
+        case "tmn":
+        case "tmx":
+          return "mdi-temperature-celsius";
+        case "uuu":
+        case "wsd":
+        case "vec":
+        case "vvv":
+          return "mdi-weather-windy";
+        case "wav":
+          return "mdi-waves";
+      }
     }
   },
   computed: {
@@ -97,23 +318,10 @@ export default {
   },
   data() {
     return {
+      loading: false,
       timeData: null,
       selectedTime: 0,
-      selectedData: [],
-      loading: false,
-      forecast: [
-        {
-          day: "Tuesday",
-          icon: "mdi-white-balance-sunny",
-          temp: "24\xB0/12\xB0"
-        },
-        {
-          day: "Wednesday",
-          icon: "mdi-white-balance-sunny",
-          temp: "22\xB0/14\xB0"
-        },
-        { day: "Thursday", icon: "mdi-cloud", temp: "25\xB0/15\xB0" }
-      ]
+      selectedData: []
     };
   }
 };
