@@ -8,7 +8,7 @@ const options = {
 // subscribe 할 topic 목록
 let subscribeList = [
   "res/hue/property", // 속성 정보 요청 응답
-  "res/hue/status", // 현재 상태 정보 요청 응답
+  "res/hue/status2", // 현재 상태 정보 요청 응답
   "res/hue/update", // hue 쪽에서 상태값이 변경될 때 마다 상태값 받음
   "res/weather/weather", // 현재 날씨 요청 응답
   "res/weather/dust", // 미세 먼지 요청 응답
@@ -61,6 +61,7 @@ function requestData(pubTopic, pubMessage) {
             pubTopic.split("/").splice(1).join("") ===
             subTopic.split("/").splice(1).join("")
           ) {
+            // console.log(JSON.parse(subMessage));
             resolve(JSON.parse(subMessage));
           }
         });

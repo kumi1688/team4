@@ -11,8 +11,8 @@ router.get("/property", async function (req, res) {
 
 // 현재 상태 전달
 router.get("/status", async function (req, res) {
-  const result = await requestData("req/hue/status");
-  console.log(result);
+  const result = await requestData("req/hue/status2");
+  // console.log(result);
   res.send(result);
   // 웹소켓 연결
   // const io = req.app.get('io');

@@ -17,6 +17,8 @@ router.get("/dust", async function (req, res) {
 // 서울특별시 종로구 청운효자동
 // 충청북도 청주시청원구 내덕1동
 // const weatherSample = require("../data/weatherData_sample.json");
+
+// localhost:8080/weather/weather?province=서울특별시&city=종로구&town=청운효자동
 router.get("/weather", async function (req, res) {
   console.log("weather", req.query);
   const data = {
