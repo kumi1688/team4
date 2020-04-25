@@ -36,7 +36,7 @@ export default {
   },
   watch: {
     drawer() {
-      console.log(this.drawer);
+      this.$store.commit('SET_DRAWER', this.drawer);
     }
   }
 };

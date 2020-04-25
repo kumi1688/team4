@@ -1,12 +1,12 @@
 <template>
-  <v-container class="ct" v-if="!loading">
-    <v-card class="mx-auto" max-width="250">
+  <v-container v-if="!loading" class='pa-2'>
+    <v-card class="pa-2" max-width="250" elevation="20" color='teal lighten-5'>
       <v-card-text>
         <h2>Hue {{ hueData.number }}</h2>
         <v-avatar :color="this.hueData.colorToString" size="200">
           <span class="white--text headline"></span>
         </v-avatar>
-        <h2>{{ hueData.on ? "켜짐" : "꺼짐" }}</h2>
+        <h2 class='font-italic font-weight-medium'>{{ hueData.on ? "켜짐" : "꺼짐" }}</h2>
       </v-card-text>
 
       <v-card-actions class="btn">
@@ -154,16 +154,5 @@ export default {
 </script>
 
 <style scoped>
-.ct {
-  text-align: center;
-}
-h2 {
-  padding-top: 10px;
-  margin: 10px;
-}
-.btn {
-  align-items: center;
-  justify-content: center;
-  align-content: center;
-}
+
 </style>

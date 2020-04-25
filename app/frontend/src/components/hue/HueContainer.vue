@@ -1,17 +1,20 @@
 <template>
   <v-container v-if="!loading">
-    <v-row>
-      <v-content v-for="(hueData, index) in hueDataAll" :key="index">
+    <v-row >
+      <v-content v-for="(hueData, index) in hueDataAll" :key="index" class='d-flex' >
         <hue-component :hueData="hueData" v-if="isUpdate">hue container</hue-component>
       </v-content>
     </v-row>
+    
+
   </v-container>
+  
 </template>
 
 <script>
 import axios from "axios";
 import io from "socket.io-client";
-const socket = io("13.125.207.178:8080/hue");
+const socket = io("localhost:8080/hue");
 
 import HueComponent from "./HueComponent";
 
@@ -103,3 +106,7 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+  
+</style>

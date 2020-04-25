@@ -46,7 +46,16 @@
 
 <script>
 export default {
-  watch: {},
+  computed: {
+    storeDrawer(){
+      return this.$store.getters.drawer;
+    }
+  },
+  watch:{
+    storeDrawer(value){
+      this.drawer = value;
+    }
+  },
   data() {
     return {
       dialog: false,
