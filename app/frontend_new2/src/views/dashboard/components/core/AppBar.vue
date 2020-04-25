@@ -3,7 +3,7 @@
     id="app-bar"
     absolute
     app
-    color="transparent"
+    color="#0288D1"
     flat
     height="75"
   >
@@ -34,7 +34,7 @@
       :label="$t('search')"
       color="secondary"
       hide-details
-      style="max-width: 165px;"
+      style="max-width: 800px;"
     >
       <template
         v-if="$vuetify.breakpoint.mdAndUp"

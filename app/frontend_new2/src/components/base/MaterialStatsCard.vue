@@ -6,9 +6,9 @@
     v-on="$listeners"
   >
     <template v-slot:after-heading>
-      <div class="ml-auto text-right">
+      <div class="mx-0">
         <div
-          class="body-3 grey--text font-weight-light"
+          class="display-3 BLACK"
           v-text="title"
         />
 
@@ -48,7 +48,6 @@
     name: 'MaterialStatsCard',
 
     inheritAttrs: false,
-
     props: {
       ...Card.props,
       icon: {

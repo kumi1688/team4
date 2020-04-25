@@ -17,6 +17,11 @@ export default new Router({
           path: '',
           component: () => import('@/views/dashboard/Dashboard'),
         },
+        {
+          name: 'Hue',
+          path: 'pages/hue',
+          component: () => import('@/views/hue/hueContainer'),
+        },
         // Pages
         {
           name: 'User Profile',
