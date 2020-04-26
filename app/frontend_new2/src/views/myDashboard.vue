@@ -4,13 +4,20 @@
     fluid
     tag="section"
   >
+    <chart
+      :v-if="!loading"
+      :data="updateData"
+      :options="temperatureChart.options"
+    />
+
     <v-row>
       <v-col
+        v-if="!update"
         cols="12"
         lg="4"
       >
         <base-material-chart-card
-          v-if="!update"
+          :eventhandlers="temperatureChart.options.events"
           :data="temperatureChart.data"
           :options="temperatureChart.options"
           hover-reveal
@@ -53,13 +60,9 @@
             </v-tooltip>
           </template>
 
-          <h3 class="card-title font-weight-light mt-2 ml-2">
-            Completed Tasks
+          <h3 class="card-title display-4 font-weight-light mt-2 ml-2">
+            온도
           </h3>
-
-          <p class="d-inline-flex font-weight-light ml-2 mt-1">
-            Last Last Campaign Performance
-          </p>
 
           <template v-slot:actions>
             <v-icon
@@ -78,11 +81,15 @@
 </template>
 
 <script>
+  import chart from './temperature/chart'
   import io from 'socket.io-client'
   const socket = io('localhost:8080/temperature')
 
   export default {
     name: 'MyDashboardDashboard',
+    components: {
+      chart,
+    },
     data () {
       return {
         temperatureChart: {
@@ -90,7 +97,7 @@
             labels: ['12am', '3pm', '6pm', '9pm', '12pm', '3am', '6am', '9am'],
             series: [
               [50, 60, 70, 80, 90, 10, 20, 99],
-              [56, 66, 78, 87, 99, 20, 30, 99],
+
             ],
           },
           options: {
@@ -105,6 +112,10 @@
               bottom: 0,
               left: 0,
             },
+            events: [{
+              event: 'update',
+              fn: () => { this.data.series = [30, 96, 50, 20, 30, 50, 40, 50] },
+            }],
           },
         },
 
@@ -113,17 +124,19 @@
           1: false,
           2: false,
         },
-        update: false,
+        loading: false,
+        updateData: null,
       }
-    },
-    watch: {
-      update () {
-        console.log(this.update)
-      },
     },
     created () {
       this.connectWebSocket()
       this.updateTemperatureWS()
+      this.updateData = {
+        labels: ['12am', '3pm', '6pm', '9pm', '12pm', '3am', '6am', '9am'],
+        series: [
+          [50, 60, 70, 80, 90, 10, 20, 99],
+        ],
+      }
     },
     methods: {
       onClick () {
@@ -137,16 +150,19 @@
           console.log('[sys] temperature 네임 스페이스 연결됨 !')
         })
       },
+      setUpdateData (newData) {
+        this.loading = true
+        this.updateData = { ...this.updateData }
+        console.log(this.updateData)
+        this.updateData.series[0] = [...this.updateData.series[0].slice(1), newData.temperature]
+        console.log(this.updateData)
+        this.loading = false
+      },
       updateTemperatureWS () {
         socket.on('update', (data) => {
           console.log('[sys] temperature 업데이트 됨!')
-          //   this.update = true
-          //   console.log(JSON.parse(data))
-        //   const { temperature } = JSON.parse(data)
-        //   const arr = [...this.temperatureChart.data.series[0].slice(1), temperature]
-        //   this.temperatureChart.data.series[1] = [...arr]
-        //   this.update = false
-        //   console.log(this.temperatureChart.data.series)
+          console.log(JSON.parse(data))
+          this.setUpdateData(JSON.parse(data))
         })
       },
     },

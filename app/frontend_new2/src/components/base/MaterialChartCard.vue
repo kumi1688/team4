@@ -7,7 +7,7 @@
     <template v-slot:heading>
       <chartist
         :data="data"
-        :event-handlers="eventHandlers"
+        :eventhandlers="eventhandlers"
         :options="options"
         :ratio="ratio"
         :responsive-options="responsiveOptions"
@@ -41,7 +41,7 @@
         type: Object,
         default: () => ({}),
       },
-      eventHandlers: {
+      eventhandlers: {
         type: Array,
         default: () => ([]),
       },
@@ -62,6 +62,9 @@
         required: true,
         validator: v => ['Bar', 'Line', 'Pie'].includes(v),
       },
+    },
+    created () {
+      console.log(this.eventhandlers, this.data, this.responsiveOptions)
     },
   }
 </script>

@@ -77,11 +77,12 @@ client.on("message", (topic, message) => {
     hueProperty = JSON.parse(message);
   } else if (topic === "req/dust") {
     console.log(JSON.parse(message));
-  } else if (topic === "temperature") {
-    console.log(JSON.parse(message));
-  } else if (topic === "light") {
-    console.log(JSON.parse(message));
   }
+  // } else if (topic === "temperature") {
+  //   console.log(JSON.parse(message));
+  // } else if (topic === "light") {
+  //   console.log(JSON.parse(message));
+  // }
 });
 
 module.exports = {
