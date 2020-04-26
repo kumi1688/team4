@@ -13,9 +13,9 @@ export default new Router({
       children: [
         // Dashboard
         {
-          name: 'Dashboard',
+          name: 'myDashboard',
           path: '',
-          component: () => import('@/views/dashboard/Dashboard'),
+          component: () => import('@/views/myDashboard'),
         },
         {
           name: 'Hue',

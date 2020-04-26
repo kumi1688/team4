@@ -169,9 +169,9 @@
       this.rooms = this.prlist.length === 0 ? [...baseRooms] : [...this.prlist]
 
       this.checkBox = new Array(this.rooms.length)
-      this.assignList = new Array(this.rooms.length)
+      this.assignList = new Array(this.palist.length)
 
-      for (let i = 0; i < this.rooms.length; i++) {
+      for (let i = 0; i < this.assignList.length; i++) {
         if (this.palist[i] !== undefined && this.palist[i] !== null) {
           this.checkBox[i] = true
           this.assignList[i] = this.palist[i]
@@ -180,6 +180,7 @@
           this.assignList[i] = null
         }
       }
+      console.log(this.checkBox, this.assignList)
     },
     methods: {
       onClose () {
@@ -196,6 +197,13 @@
         this.roomInput = ''
       },
       removeRoom (index) {
+        for (let i = 0; i < this.assignList.length; i++) {
+          if (this.assignList[i] === this.rooms[index]) {
+            this.assignList[i] = null
+            this.checkBox[i] = false
+          }
+        }
+        console.log(this.assignList, this.checkBox)
         this.rooms = [...this.rooms.slice(0, index), ...this.rooms.slice(index + 1)]
       },
       setCurrentRoom (item) {

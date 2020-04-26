@@ -18,6 +18,11 @@
       :property="property"
       @closeDialog="closeDialogProperty"
     />
+    <carousels
+      v-if="dialog[3]"
+      :open="dialog[3]"
+      @closeDialog="closeDialogManual"
+    />
     <v-row>
       <v-col
         v-for="(item, index) in headers"
@@ -36,98 +41,14 @@
       </v-col>
 
       <v-col
-        cols="12"
-        md="3"
+        v-for="(room) in Object.keys(sortedRoomList)"
+        :key="room"
       >
-        <hue-list />
-      </v-col>
-
-      <v-col
-        cols="12"
-        md="3"
-      >
-        <base-material-card class="px-5 py-3">
-          <template v-slot:heading>
-            <v-tabs
-              v-model="tabs"
-              background-color="transparent"
-              slider-color="white"
-            >
-              <span
-                class="subheading font-weight-light mx-3"
-                style="align-self: center"
-              >Tasks:</span>
-              <v-tab class="mr-3">
-                <v-icon class="mr-2">
-                  mdi-bug
-                </v-icon>
-                Bugs
-              </v-tab>
-              <v-tab class="mr-3">
-                <v-icon class="mr-2">
-                  mdi-code-tags
-                </v-icon>
-                Website
-              </v-tab>
-              <v-tab>
-                <v-icon class="mr-2">
-                  mdi-cloud
-                </v-icon>
-                Server
-              </v-tab>
-            </v-tabs>
-          </template>
-
-          <v-tabs-items
-            v-model="tabs"
-            class="transparent"
-          >
-            <v-tab-item
-              v-for="n in 3"
-              :key="n"
-            >
-              <v-card-text>
-                <template v-for="(task, i) in tasks[tabs]">
-                  <v-row
-                    :key="i"
-                    align="center"
-                  >
-                    <v-col cols="1">
-                      <v-list-item-action>
-                        <v-checkbox
-                          v-model="task.value"
-                          color="secondary"
-                        />
-                      </v-list-item-action>
-                    </v-col>
-
-                    <v-col cols="9">
-                      <div
-                        class="font-weight-light"
-                        v-text="task.text"
-                      />
-                    </v-col>
-
-                    <v-col
-                      cols="2"
-                      class="text-right"
-                    >
-                      <v-icon class="mx-1">
-                        mdi-pencil
-                      </v-icon>
-                      <v-icon
-                        color="error"
-                        class="mx-1"
-                      >
-                        mdi-close
-                      </v-icon>
-                    </v-col>
-                  </v-row>
-                </template>
-              </v-card-text>
-            </v-tab-item>
-          </v-tabs-items>
-        </base-material-card>
+        <hue-list
+          :huelist="sortedRoomList[room]"
+          :room="room"
+          :huedata="filteredHueData[room]"
+        />
       </v-col>
     </v-row>
   </v-container>
@@ -136,6 +57,7 @@
 <script>
   import hueProperty from './hueProperty'
   import hueDialog from './hueDialog'
+  import carousels from './carousels'
   import hueList from './hueList'
   import axios from 'axios'
   import io from 'socket.io-client'
@@ -147,6 +69,7 @@
       'hue-list': hueList,
       'hue-dialog': hueDialog,
       'hue-property': hueProperty,
+      carousels: carousels,
     },
     data () {
       return {
@@ -156,162 +79,6 @@
           { color: 'info', title: 'Hue 속성', icon: 'mdi-information-outline' },
           { color: 'info', title: 'Hue 사용법', icon: 'mdi-bookshelf' },
         ],
-        dailySalesChart: {
-          data: {
-            labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-            series: [
-              [12, 17, 7, 17, 23, 18, 38],
-            ],
-          },
-          options: {
-            lineSmooth: this.$chartist.Interpolation.cardinal({
-              tension: 0,
-            }),
-            low: 0,
-            high: 50, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
-            chartPadding: {
-              top: 0,
-              right: 0,
-              bottom: 0,
-              left: 0,
-            },
-          },
-        },
-        dataCompletedTasksChart: {
-          data: {
-            labels: ['12am', '3pm', '6pm', '9pm', '12pm', '3am', '6am', '9am'],
-            series: [
-              [230, 750, 450, 300, 280, 240, 200, 190],
-            ],
-          },
-          options: {
-            lineSmooth: this.$chartist.Interpolation.cardinal({
-              tension: 0,
-            }),
-            low: 0,
-            high: 1000, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
-            chartPadding: {
-              top: 0,
-              right: 0,
-              bottom: 0,
-              left: 0,
-            },
-          },
-        },
-        emailsSubscriptionChart: {
-          data: {
-            labels: ['Ja', 'Fe', 'Ma', 'Ap', 'Mai', 'Ju', 'Jul', 'Au', 'Se', 'Oc', 'No', 'De'],
-            series: [
-              [542, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895],
-
-            ],
-          },
-          options: {
-            axisX: {
-              showGrid: false,
-            },
-            low: 0,
-            high: 1000,
-            chartPadding: {
-              top: 0,
-              right: 5,
-              bottom: 0,
-              left: 0,
-            },
-          },
-          responsiveOptions: [
-            ['screen and (max-width: 640px)', {
-              seriesBarDistance: 5,
-              axisX: {
-                labelInterpolationFnc: function (value) {
-                  return value[0]
-                },
-              },
-            }],
-          ],
-        },
-        items: [
-          {
-            id: 1,
-            name: 'Dakota Rice',
-            country: 'Niger',
-            city: 'Oud-Tunrhout',
-            salary: '$35,738',
-          },
-          {
-            id: 2,
-            name: 'Minerva Hooper',
-            country: 'Curaçao',
-            city: 'Sinaai-Waas',
-            salary: '$23,738',
-          },
-          {
-            id: 3,
-            name: 'Sage Rodriguez',
-            country: 'Netherlands',
-            city: 'Overland Park',
-            salary: '$56,142',
-          },
-          {
-            id: 4,
-            name: 'Philip Chanley',
-            country: 'Korea, South',
-            city: 'Gloucester',
-            salary: '$38,735',
-          },
-          {
-            id: 5,
-            name: 'Doris Greene',
-            country: 'Malawi',
-            city: 'Feldkirchen in Kārnten',
-            salary: '$63,542',
-          },
-        ],
-        tabs: 0,
-        tasks: {
-          0: [
-            {
-              text: 'Sign contract for "What are conference organizers afraid of?"',
-              value: true,
-            },
-            {
-              text: 'Lines From Great Russian Literature? Or E-mails From My Boss?',
-              value: false,
-            },
-            {
-              text: 'Flooded: One year later, assessing what was lost and what was found when a ravaging rain swept through metro Detroit',
-              value: false,
-            },
-            {
-              text: 'Create 4 Invisible User Experiences you Never Knew About',
-              value: true,
-            },
-          ],
-          1: [
-            {
-              text: 'Flooded: One year later, assessing what was lost and what was found when a ravaging rain swept through metro Detroit',
-              value: true,
-            },
-            {
-              text: 'Sign contract for "What are conference organizers afraid of?"',
-              value: false,
-            },
-          ],
-          2: [
-            {
-              text: 'Lines From Great Russian Literature? Or E-mails From My Boss?',
-              value: false,
-            },
-            {
-              text: 'Flooded: One year later, assessing what was lost and what was found when a ravaging rain swept through metro Detroit',
-              value: true,
-            },
-            {
-              text: 'Sign contract for "What are conference organizers afraid of?"',
-              value: true,
-            },
-          ],
-        },
         list: {
           0: false,
           1: false,
@@ -326,32 +93,65 @@
         },
         assignList: [],
         roomList: [],
-
+        sortedRoomList: {},
+        hueDataAll: null,
+        filteredHueData: null,
       }
     },
+
     async created () {
       await this.getHueProperty()
       this.assignList = new Array(this.property.number.length)
       for (let i = 0; i < this.assignList.length; i++) {
         this.assignList[i] = null
       }
+      await this.getHueStatus()
+      console.log(this.hueDataAll)
       this.connectWebSocket()
-      // this.updateHueState()
+      this.updateHueState()
     },
     methods: {
+      filterHueData () {
+        const data = {}
+        console.log(this.sortedRoomList)
+        Object.keys(this.sortedRoomList).map(room => {
+          data[room] = []
+          this.sortedRoomList[room].map(number => {
+            const idata = this.hueDataAll.find(hda => hda.number === number)
+            data[room] = [...data[room], idata]
+          })
+        })
+        return data
+      },
       complete (index) {
         this.list[index] = !this.list[index]
       },
       closeDialogRoom (data) {
         this.dialog[0] = false
-        // for (let i = 0; i < this.property.number.length; i++) {
-        //   if (data.assignList[i] !== null && data.assignList[i] !== this.assignList[i]) this.assignList[i] = data.assignList[i]
-        // }
         this.assignList = [...data.assignList]
         this.roomList = [...data.roomList]
+        console.log(this.assignList, this.roomList)
+
+        // 각 방마다 전구 파악 후 배분
+        const arr = {}
+        this.roomList.forEach(element => {
+          arr[element] = this.assignList.map((al, index) => {
+            if (al === element) return index
+          })
+        })
+        Object.keys(arr).forEach(element => {
+          arr[element] = arr[element].filter(item => item !== undefined)
+          arr[element] = arr[element].map(item => this.property.number[item])
+        })
+        console.log(arr)
+        this.sortedRoomList = arr
+        this.filteredHueData = this.filterHueData()
       },
       closeDialogProperty () {
         this.dialog[2] = false
+      },
+      closeDialogManual () {
+        this.dialog[3] = false
       },
       openDialog (index) {
         this.dialog[index] = true
@@ -362,6 +162,55 @@
         this.property = result.data
         console.log('[sys] hue property 설정 완료')
       },
+      async getHueStatus () {
+        const result = await axios.get('/api/light/status')
+        this.hueDataAll = result.data
+        this.hueDataAll.forEach(function (element) {
+          const { hue, bri, sat } = element
+
+          let arr = []
+          if (hue < 16) arr = [...arr, '0' + hue.toString(16)]
+          else arr = [...arr, hue.toString(16)]
+
+          if (sat < 16) arr = [...arr, '0' + sat.toString(16)]
+          else arr = [...arr, sat.toString(16)]
+
+          if (bri < 16) arr = [...arr, '0' + bri.toString(16)]
+          else arr = [...arr, bri.toString(16)]
+
+          element.colorToString = '#' + arr.join('')
+        })
+
+        console.log('[sys] hue status 초기 설정 완료')
+      },
+      compareState (updateData) {
+        this.isUpdate = false
+        this.hueDataAll.map(element => {
+          if (element.number === updateData.number) {
+            element.ct = updateData.ct
+            element.bri = updateData.bri
+            element.sat = updateData.sat
+            element.hue = updateData.hue
+            element.on = updateData.on
+
+            const { hue, bri, sat } = element
+
+            let arr = []
+            if (hue < 16) arr = [...arr, '0' + hue.toString(16)]
+            else arr = [...arr, hue.toString(16)]
+
+            if (sat < 16) arr = [...arr, '0' + sat.toString(16)]
+            else arr = [...arr, sat.toString(16)]
+
+            if (bri < 16) arr = [...arr, '0' + bri.toString(16)]
+            else arr = [...arr, bri.toString(16)]
+
+            element.colorToString = '#' + arr.join('')
+          }
+        })
+        //   console.log(this.hueDataAll);
+        this.isUpdate = true
+      },
       connectWebSocket () {
         socket.on('connection', () => {
           console.log('[sys] hue 웹소켓 연결됨')
@@ -370,10 +219,11 @@
       updateHueState () {
         socket.on('update', data => {
           console.log('업데이트 됨', JSON.parse(data))
+          this.compareState(JSON.parse(data))
         })
-        socket.on('test', data => {
-          console.log('웹소켓 테스트', JSON.parse(data))
-        })
+        // socket.on('test', data => {
+        //   console.log('웹소켓 테스트', JSON.parse(data))
+        // })
       },
 
     },

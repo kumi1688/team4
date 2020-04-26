@@ -1,44 +1,47 @@
 <template>
-  <base-material-card
-    :icon="icon"
-    class="v-card--material-stats"
-    v-bind="$attrs"
-    v-on="$listeners"
-  >
-    <template v-slot:after-heading>
-      <div class="mx-0">
-        <div
-          class="display-3 BLACK"
-          v-text="title"
-        />
-
-        <h3 class="display-2 font-weight-light text--primary">
-          {{ value }} <small>{{ smallValue }}</small>
-        </h3>
-      </div>
-    </template>
-
-    <v-col
-      cols="12"
-      class="px-0"
+  <v-container @click="clicked">
+    <base-material-card
+      :icon="icon"
+      class="v-card--material-stats"
+      v-bind="$attrs"
+      v-on="$listeners"
     >
-      <v-divider />
-    </v-col>
+      <template v-slot:after-heading>
+        <div class="mx-0">
+          <div
+            class="display-3 BLACK"
 
-    <v-icon
-      :color="subIconColor"
-      size="16"
-      class="ml-2 mr-1"
-    >
-      {{ subIcon }}
-    </v-icon>
+            v-text="title"
+          />
 
-    <span
-      :class="subTextColor"
-      class="caption grey--text font-weight-light"
-      v-text="subText"
-    />
-  </base-material-card>
+          <h3 class="display-2 font-weight-light text--primary">
+            {{ value }} <small>{{ smallValue }}</small>
+          </h3>
+        </div>
+      </template>
+
+      <v-col
+        cols="12"
+        class="px-0"
+      >
+        <v-divider />
+      </v-col>
+
+      <v-icon
+        :color="subIconColor"
+        size="16"
+        class="ml-2 mr-1"
+      >
+        {{ subIcon }}
+      </v-icon>
+
+      <span
+        :class="subTextColor"
+        class="caption grey--text font-weight-light"
+        v-text="subText"
+      />
+    </base-material-card>
+  </v-container>
 </template>
 
 <script>
@@ -50,6 +53,10 @@
     inheritAttrs: false,
     props: {
       ...Card.props,
+      index: {
+        type: Number,
+        default: undefined,
+      },
       icon: {
         type: String,
         required: true,
@@ -81,6 +88,11 @@
       smallValue: {
         type: String,
         default: undefined,
+      },
+    },
+    methods: {
+      clicked () {
+        this.$emit('openDialog', this.index)
       },
     },
   }

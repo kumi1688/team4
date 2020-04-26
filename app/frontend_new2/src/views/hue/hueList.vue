@@ -1,78 +1,114 @@
 <template>
-  <v-card
-    max-width="500"
-    class="mx-auto"
-  >
-    <v-toolbar
-      color="deep-purple accent-4"
-      dark
+  <v-container>
+    <hue-control
+      v-if="dialog"
+      :open="dialog"
+      :huedata="selectedData"
+      @closeDialog="closeDialog"
+    />
+
+    <hue-control-all
+      v-if="dialogAll"
+      :open="dialogAll"
+      :numlist="numlist"
+      @closeDialog="closeDialog"
+    />
+    <v-card
+      max-width="500"
+      class="mx-auto"
     >
-      <v-app-bar-nav-icon />
-
-      <v-toolbar-title>New Chat</v-toolbar-title>
-
-      <v-spacer />
-
-      <v-btn icon>
-        <v-icon>mdi-magnify</v-icon>
-      </v-btn>
-    </v-toolbar>
-
-    <v-list subheader>
-      <v-subheader>Recent chat</v-subheader>
-
-      <v-list-item
-        v-for="item in items"
-        :key="item.title"
+      <v-toolbar
+        color="deep-purple accent-4"
+        dark
       >
-        <v-list-item-avatar>
-          <v-img :src="item.avatar" />
-        </v-list-item-avatar>
+        <v-app-bar-nav-icon />
 
-        <v-list-item-content>
-          <v-list-item-title v-text="item.title" />
-        </v-list-item-content>
+        <v-toolbar-title>{{ room }}</v-toolbar-title>
 
-        <font-awesome-icon icon="check" />
-      </v-list-item>
-    </v-list>
+        <v-spacer />
 
-    <v-divider />
+        <v-btn icon>
+          <v-icon @click="openDialog(-1)">
+            fas fa-cog
+          </v-icon>
+        </v-btn>
+      </v-toolbar>
 
-    <v-list subheader>
-      <v-subheader>Previous chats</v-subheader>
+      <v-list>
+        <v-list-item
+          v-for="hue in huelist"
+          :key="hue"
+        >
+          <v-list-item-avatar>
+            <v-icon color="green">
+              far fa-lightbulb
+            </v-icon>
+          </v-list-item-avatar>
 
-      <v-list-item
-        v-for="item in items2"
-        :key="item.title"
-      >
-        <v-list-item-avatar>
-          <v-img :src="item.avatar" />
-        </v-list-item-avatar>
+          <v-list-item-content>
+            <v-list-item-title class="display-2">
+              {{ hue }}번 전구
+            </v-list-item-title>
+          </v-list-item-content>
 
-        <v-list-item-content>
-          <v-list-item-title v-text="item.title" />
-        </v-list-item-content>
-      </v-list-item>
-    </v-list>
-  </v-card>
+          <v-icon @click="openDialog(hue)">
+            fas fa-cog
+          </v-icon>
+        </v-list-item>
+      </v-list>
+      <v-divider />
+    </v-card>
+  </v-container>
 </template>
 
 <script>
-  import { faHeart } from '@fortawesome/free-regular-svg-icons'
+  import hueControl from './hueControl'
+  import hueControlAll from './hueControlAll'
 
   export default {
+    components: {
+      'hue-control': hueControl,
+      'hue-control-all': hueControlAll,
+    },
+    props: {
+      huelist: {
+        type: Array,
+        default: undefined,
+      },
+      room: {
+        type: String,
+        default: undefined,
+      },
+      huedata: {
+        type: Array,
+        default: undefined,
+      },
+    },
     data: () => ({
-      icon1: faHeart,
-      items: [
-        { active: true, title: 'Jason Oner', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
-        { active: true, title: 'Ranee Carlson', avatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg' },
-        { title: 'Cindy Baker', avatar: 'https://cdn.vuetifyjs.com/images/lists/3.jpg' },
-        { title: 'Ali Connors', avatar: 'https://cdn.vuetifyjs.com/images/lists/4.jpg' },
-      ],
-      items2: [
-        { title: 'Travis Howard', avatar: 'https://cdn.vuetifyjs.com/images/lists/5.jpg' },
-      ],
+      dialog: false,
+      hue: -1,
+      selectedData: null,
+      dialogAll: false,
+      numlist: null,
     }),
+    created () {
+      console.log(this.huelist, this.room, this.huedata)
+    },
+    methods: {
+      closeDialog () {
+        this.dialog = false
+        this.dialogAll = false
+      },
+      openDialog (hue) {
+        this.hue = hue
+        if (hue === -1) {
+          this.dialogAll = true
+          this.numlist = this.huedata.map(hd => hd.number)
+        } else {
+          this.selectedData = this.huedata.find(hd => hd.number === hue)
+          this.dialog = true
+        }
+      },
+    },
   }
 </script>
