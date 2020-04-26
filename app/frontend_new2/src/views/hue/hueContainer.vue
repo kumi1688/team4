@@ -4,6 +4,20 @@
     fluid
     tag="section"
   >
+    <hue-dialog
+      v-if="dialog[0]"
+      :open="dialog[0]"
+      :property="property"
+      :prlist="roomList"
+      :palist="assignList"
+      @closeDialog="closeDialogRoom"
+    />
+    <hue-property
+      v-if="dialog[2]"
+      :open="dialog[2]"
+      :property="property"
+      @closeDialog="closeDialogProperty"
+    />
     <v-row>
       <v-col
         v-for="(item, index) in headers"
@@ -16,6 +30,8 @@
           :color="item.color"
           :icon="item.icon"
           :title="item.title"
+          :index="index"
+          @openDialog="openDialog(index)"
         />
       </v-col>
 
@@ -25,9 +41,10 @@
       >
         <hue-list />
       </v-col>
+
       <v-col
         cols="12"
-        md=""
+        md="3"
       >
         <base-material-card class="px-5 py-3">
           <template v-slot:heading>
@@ -117,13 +134,19 @@
 </template>
 
 <script>
+  import hueProperty from './hueProperty'
+  import hueDialog from './hueDialog'
   import hueList from './hueList'
   import axios from 'axios'
+  import io from 'socket.io-client'
+  const socket = io('localhost:8080/hue')
 
   export default {
     name: 'HueContainer',
     components: {
       'hue-list': hueList,
+      'hue-dialog': hueDialog,
+      'hue-property': hueProperty,
     },
     data () {
       return {
@@ -295,22 +318,65 @@
           2: false,
         },
         property: null,
+        dialog: {
+          0: false,
+          1: false,
+          2: false,
+          3: false,
+        },
+        assignList: [],
+        roomList: [],
+
       }
     },
     async created () {
       await this.getHueProperty()
-      console.log(this.property)
+      this.assignList = new Array(this.property.number.length)
+      for (let i = 0; i < this.assignList.length; i++) {
+        this.assignList[i] = null
+      }
+      this.connectWebSocket()
+      // this.updateHueState()
     },
-
     methods: {
       complete (index) {
         this.list[index] = !this.list[index]
       },
+      closeDialogRoom (data) {
+        this.dialog[0] = false
+        // for (let i = 0; i < this.property.number.length; i++) {
+        //   if (data.assignList[i] !== null && data.assignList[i] !== this.assignList[i]) this.assignList[i] = data.assignList[i]
+        // }
+        this.assignList = [...data.assignList]
+        this.roomList = [...data.roomList]
+      },
+      closeDialogProperty () {
+        this.dialog[2] = false
+      },
+      openDialog (index) {
+        this.dialog[index] = true
+      },
+
       async getHueProperty () {
         const result = await axios.get('/api/light/property')
         this.property = result.data
         console.log('[sys] hue property 설정 완료')
       },
+      connectWebSocket () {
+        socket.on('connection', () => {
+          console.log('[sys] hue 웹소켓 연결됨')
+        })
+      },
+      updateHueState () {
+        socket.on('update', data => {
+          console.log('업데이트 됨', JSON.parse(data))
+        })
+        socket.on('test', data => {
+          console.log('웹소켓 테스트', JSON.parse(data))
+        })
+      },
+
     },
+
   }
 </script>
