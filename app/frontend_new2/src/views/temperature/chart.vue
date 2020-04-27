@@ -9,11 +9,12 @@
   import Chartist from 'chartist'
 
   export default {
-
     // data is an object containing Chart X and Y axes data
     // Options is your Chartist chart customization options
-    props: ['data', 'options'],
-
+    props: {
+      data: { type: Object, default: undefined },
+      options: { type: Object, default: undefined },
+    },
     // IMPORTANT: Vue.js is Reactive framework.
     // Hence watch for prop changes here
     watch: {
