@@ -7,7 +7,7 @@
     <template v-slot:heading>
       <chartist
         :data="data"
-        :eventhandlers="eventhandlers"
+        :event-handlers="eventHandlers"
         :options="options"
         :ratio="ratio"
         :responsive-options="responsiveOptions"
@@ -41,9 +41,9 @@
         type: Object,
         default: () => ({}),
       },
-      eventhandlers: {
+      eventHandlers: {
         type: Array,
-        default: () => ([]),
+        default: () => [],
       },
       options: {
         type: Object,
@@ -55,7 +55,7 @@
       },
       responsiveOptions: {
         type: Array,
-        default: () => ([]),
+        default: () => [],
       },
       type: {
         type: String,
@@ -64,35 +64,35 @@
       },
     },
     created () {
-      console.log(this.eventhandlers, this.data, this.responsiveOptions)
+    // console.log(this.eventHandlers, this.data, this.responsiveOptions)
     },
   }
 </script>
 
 <style lang="sass">
-  .v-card--material-chart
-    p
-      color: #999
+.v-card--material-chart
+  p
+    color: #999
 
-    .v-card--material__heading
-      max-height: 185px
+  .v-card--material__heading
+    max-height: 185px
 
-      .ct-label
-        color: inherit
-        opacity: .7
-        font-size: 0.975rem
-        font-weight: 100
+    .ct-label
+      color: inherit
+      opacity: .7
+      font-size: 0.975rem
+      font-weight: 100
 
-      .ct-grid
-        stroke: rgba(255, 255, 255, 0.2)
+    .ct-grid
+      stroke: rgba(255, 255, 255, 0.2)
 
-      .ct-series-a .ct-point,
-      .ct-series-a .ct-line,
-      .ct-series-a .ct-bar,
-      .ct-series-a .ct-slice-donut
-          stroke: rgba(255,255,255,.8)
+    .ct-series-a .ct-point,
+    .ct-series-a .ct-line,
+    .ct-series-a .ct-bar,
+    .ct-series-a .ct-slice-donut
+        stroke: rgba(255,255,255,.8)
 
-      .ct-series-a .ct-slice-pie,
-      .ct-series-a .ct-area
-          fill: rgba(255,255,255,.4)
+    .ct-series-a .ct-slice-pie,
+    .ct-series-a .ct-area
+        fill: rgba(255,255,255,.4)
 </style>

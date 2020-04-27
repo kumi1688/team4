@@ -3,7 +3,7 @@
     <v-dialog
       v-model="dialog"
       persistent
-      max-width="650px"
+      max-width="700px"
     >
       <v-card>
         <v-card-title class="display-4 CONDENSED">
@@ -16,15 +16,10 @@
               elevation="20"
               class="mx-2 pa-2"
             >
-              <h2
-
-                class="display-2 font-weight-light"
-              >
+              <h2 class="display-2 font-weight-light">
                 방 목록
               </h2>
-              <v-list-item-group
-                color="primary"
-              >
+              <v-list-item-group color="primary">
                 <v-list-item
                   v-for="(item, i) in rooms"
                   :key="i"
@@ -50,14 +45,10 @@
               elevation="20"
               class="mx-2 pa-2"
             >
-              <h2
-                class="display-2 font-weight-light"
-              >
+              <h2 class="display-2 font-weight-light">
                 Hue 목록
               </h2>
-              <v-list-item-group
-                color="primary"
-              >
+              <v-list-item-group color="primary">
                 <v-list-item
                   v-for="(item, i) in property.number"
                   :key="i"
@@ -74,7 +65,6 @@
                     :label="assignList[i]"
                     :disabled="checkDisable(i)"
                     color="red darken-3"
-
                     hide-details
                   />
                 </v-list-item>
@@ -204,7 +194,10 @@
           }
         }
         console.log(this.assignList, this.checkBox)
-        this.rooms = [...this.rooms.slice(0, index), ...this.rooms.slice(index + 1)]
+        this.rooms = [
+          ...this.rooms.slice(0, index),
+          ...this.rooms.slice(index + 1),
+        ]
       },
       setCurrentRoom (item) {
         this.currentRoom = item
@@ -215,19 +208,25 @@
       checkDisable (index) {
         // 선택되었고 현재 방 이름과 할당 리스트가 다른 경우
         if (this.currentRoom === null) return true
-        else if (this.checkBox[index] && this.currentRoom !== this.assignList[index]) return true
-        else return false
+        else if (
+          this.checkBox[index] &&
+          this.currentRoom !== this.assignList[index]
+        ) { return true } else return false
       },
       resetData () {
-        this.checkBox = this.checkBox.map(() => { return false })
-        this.assignList = this.assignList.map(() => { return null })
+        this.checkBox = this.checkBox.map(() => {
+          return false
+        })
+        this.assignList = this.assignList.map(() => {
+          return null
+        })
       },
     },
   }
 </script>
 
 <style scoped>
-    #room{
-        border: solid;
-    }
+#room {
+  border: solid;
+}
 </style>

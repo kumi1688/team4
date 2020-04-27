@@ -4,101 +4,46 @@
     fluid
     tag="section"
   >
-    <chart
-      :v-if="!loading"
-      :data="updateData"
-      :options="temperatureChart.options"
-    />
-
     <v-row>
       <v-col
-        v-if="!update"
+        v-for="(type, index) in Object.keys(chartData)"
+        :key="index"
         cols="12"
         lg="4"
       >
-        <base-material-chart-card
-          :eventhandlers="temperatureChart.options.events"
-          :data="temperatureChart.data"
-          :options="temperatureChart.options"
+        <chart-container
+          v-if="!loading"
+          :data="chartData[type]"
+          :options="baseChartOption.options"
+          :name="type"
           hover-reveal
-          color="info"
+          color="green"
           type="Line"
-        >
-          <template v-slot:reveal-actions>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ attrs, on }">
-                <v-btn
-                  v-bind="attrs"
-                  color="info"
-                  icon
-                  v-on="on"
-                >
-                  <v-icon
-                    color="info"
-                  >
-                    mdi-refresh
-                  </v-icon>
-                </v-btn>
-              </template>
-
-              <span>Refresh</span>
-            </v-tooltip>
-
-            <v-tooltip bottom>
-              <template v-slot:activator="{ attrs, on }">
-                <v-btn
-                  v-bind="attrs"
-                  light
-                  icon
-                  v-on="on"
-                >
-                  <v-icon>mdi-pencil</v-icon>
-                </v-btn>
-              </template>
-
-              <span>Change Date</span>
-            </v-tooltip>
-          </template>
-
-          <h3 class="card-title display-4 font-weight-light mt-2 ml-2">
-            온도
-          </h3>
-
-          <template v-slot:actions>
-            <v-icon
-              class="mr-1"
-              small
-              @click="onClick"
-            >
-              mdi-clock-outline
-            </v-icon>
-            <span class="caption grey--text font-weight-light">campaign sent 26 minutes ago</span>
-          </template>
-        </base-material-chart-card>
+        />
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
-  import chart from './temperature/chart'
+  import chartContainer from './chart/chartContainer'
   import io from 'socket.io-client'
-  const socket = io('localhost:8080/temperature')
+  const socketTemp = io('localhost:8080/temperature')
+  const socketDust = io('localhost:8080/dust')
+  const socketLight = io('localhost:8080/light')
 
   export default {
     name: 'MyDashboardDashboard',
     components: {
-      chart,
+      'chart-container': chartContainer,
     },
+
     data () {
       return {
-        temperatureChart: {
+        baseChartOption: {
           data: {
-            labels: ['12am', '3pm', '6pm', '9pm', '12pm', '3am', '6am', '9am'],
-            series: [
-              [50, 60, 70, 80, 90, 10, 20, 99],
-
-            ],
+            labels: ['0초', '2초', '4초', '6초', '8초', '10초', '12초', '14초'],
+            series: [[50, 60, 70, 80, 90, 10, 20, 99]],
           },
           options: {
             lineSmooth: this.$chartist.Interpolation.cardinal({
@@ -112,57 +57,93 @@
               bottom: 0,
               left: 0,
             },
-            events: [{
-              event: 'update',
-              fn: () => { this.data.series = [30, 96, 50, 20, 30, 50, 40, 50] },
-            }],
+            events: [
+              {
+                event: 'update',
+                fn: () => {
+                  this.data.series = [30, 96, 50, 20, 30, 50, 40, 50]
+                },
+              },
+            ],
           },
         },
-
+        chartData: {},
         list: {
           0: false,
           1: false,
           2: false,
         },
+        sensorList: ['temperature', 'light', 'dust'],
         loading: false,
-        updateData: null,
+        updateDataTemperature: null,
+        baseData: {
+          labels: [
+            '0초',
+            '2초',
+            '4초',
+            '6초',
+            '8초',
+            '10초',
+            '12초',
+            '14초',
+          ].reverse(),
+          series: [[50, 60, 70, 80, 90, 10, 20, 99]],
+        },
       }
     },
     created () {
       this.connectWebSocket()
-      this.updateTemperatureWS()
-      this.updateData = {
-        labels: ['12am', '3pm', '6pm', '9pm', '12pm', '3am', '6am', '9am'],
-        series: [
-          [50, 60, 70, 80, 90, 10, 20, 99],
-        ],
-      }
+
+      this.sensorList.map(element => {
+        this.chartData[element] = { ...this.baseData }
+      })
+
+      this.updateDataWS()
     },
     methods: {
-      onClick () {
-        this.temperatureChart.data.series[2] = [30, 96, 50, 20, 30, 50, 40, 50]
-      },
       complete (index) {
         this.list[index] = !this.list[index]
       },
       connectWebSocket () {
-        socket.on('connection', () => {
+        socketTemp.on('connection', () => {
           console.log('[sys] temperature 네임 스페이스 연결됨 !')
         })
+        socketDust.on('connection', () => {
+          console.log('[sys] dust 네임 스페이스 연결됨 !')
+        })
+        socketLight.on('connection', () => {
+          console.log('[sys] light 네임 스페이스 연결됨 !')
+        })
       },
-      setUpdateData (newData) {
+      updateChartData (newData, type) {
         this.loading = true
-        this.updateData = { ...this.updateData }
-        console.log(this.updateData)
-        this.updateData.series[0] = [...this.updateData.series[0].slice(1), newData.temperature]
-        console.log(this.updateData)
+
+        this.chartData[type] = { ...this.chartData[type] }
+        if (!isNaN(newData[type])) {
+          this.chartData[type].series[0] = [
+            ...this.chartData[type].series[0].slice(1),
+            parseInt(newData[type], 10),
+          ]
+        }
+        console.log(this.chartData)
+
         this.loading = false
       },
-      updateTemperatureWS () {
-        socket.on('update', (data) => {
+      updateDataWS () {
+        socketTemp.on('update', data => {
           console.log('[sys] temperature 업데이트 됨!')
+          // console.log(JSON.parse(data))
+          this.updateChartData(JSON.parse(data), 'temperature')
+        })
+        socketDust.on('update', data => {
+          // console.log('[sys] dust 업데이트 됨!')
           console.log(JSON.parse(data))
-          this.setUpdateData(JSON.parse(data))
+          this.updateChartData(JSON.parse(data), 'dust')
+        })
+        socketLight.on('update', data => {
+          // console.log('[sys] light 업데이트 됨!')
+          console.log(JSON.parse(data))
+          this.updateChartData(JSON.parse(data), 'light')
         })
       },
     },
