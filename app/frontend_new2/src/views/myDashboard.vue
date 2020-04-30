@@ -115,7 +115,7 @@
       updateDataWS () {
         socketList.map(socket => {
           socket.on('update', (data) => {
-            console.log(`[sys] ${socket.nsp} 업데이트 됨!`)
+            // console.log(`[sys] ${socket.nsp} 업데이트 됨!`)
             this.updateChartData(JSON.parse(data), socket.nsp.split('').slice(1).join(''))
           })
         })

@@ -92,38 +92,37 @@
         timeData: null,
         selectedTime: 0,
         selectedData: [],
+        currentTemperature: null,
       }
     },
     computed: {
-      currentTemperature () {
-        const target = this.items.find(element => element.name === '기온')
-        return target.value
-      },
       currentDate () {
         return new Date()
       },
     },
     watch: {
-      selectedTime () {
-        this.setData()
-        let items = []
-        this.selectedData.map(data => {
-          items = [
-            ...items,
-            {
-              name: this.getName(data[0].toLowerCase()),
-              unit: this.getUnit(data[0].toLowerCase()),
-              icon: this.getIcon(data[0].toLowerCase()),
-              value: this.getValue(data[0].toLowerCase(), data[1]),
-            },
-          ]
-        })
-        this.items = items.filter(item => item.name !== undefined)
+      selectedTime: {
 
-      // console.log(this.items)
-      },
-      selectedData () {
-      // console.log(this.selectedData)
+        handler () {
+          this.setData()
+          let items = []
+          this.selectedData.map(data => {
+            items = [
+              ...items,
+              {
+                name: this.getName(data[0].toLowerCase()),
+                unit: this.getUnit(data[0].toLowerCase()),
+                icon: this.getIcon(data[0].toLowerCase()),
+                value: this.getValue(data[0].toLowerCase(), data[1]),
+              },
+            ]
+          })
+          this.items = items.filter(item => item.name !== undefined)
+
+          const target = this.items.find(element => element.name === '기온')
+          this.currentTemperature = target.value
+          console.log(this.items)
+        },
       },
     },
     items () {
@@ -167,6 +166,8 @@
       })
 
       this.items = items.filter(item => item.name !== undefined)
+      const target = this.items.find(element => element.name === '기온')
+      this.currentTemperature = target.value
       console.log(this.items)
     },
     methods: {
@@ -182,7 +183,6 @@
       },
       getValue (code, value) {
         if (code === 'sky') {
-          console.log(code, value)
           if (value === '1') return '맑음'
           else if (value === '3') return '구름 많음'
           else return '흐림'
