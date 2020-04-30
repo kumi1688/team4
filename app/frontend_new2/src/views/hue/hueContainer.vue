@@ -61,7 +61,7 @@
   import hueList from './hueList'
   import axios from 'axios'
   import io from 'socket.io-client'
-  const socket = io('localhost:8080/hue')
+  const socket = io(`${process.env.VUE_APP_BACKEND_URL}/hue`)
 
   export default {
     name: 'HueContainer',
