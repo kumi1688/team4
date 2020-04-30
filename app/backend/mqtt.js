@@ -13,8 +13,9 @@ let subscribeList = [
   "res/weather/weather", // 현재 날씨 요청 응답
   "res/weather/dust", // 미세 먼지 요청 응답
   "req/dust",
-  "temperature",
-  "light",
+  "req/temperature/status",
+  "req/light/status",
+  'res/dust/update', 'res/light/update', 'res/flame/update', 'res/gas/update', 'res/temperature/update'
 ];
 // publish 할 topic 목록
 let publishList = [
@@ -27,14 +28,16 @@ let publishList = [
 
 // hue 속성
 let hueProperty = {};
-let hueStatus = [];
+
 //mqtt 연결
 const client = mqtt.connect(options);
+client.setMaxListeners(30);
+
 client.on("connect", () => {
-  console.log("mqtt 연결됨");
+  console.log("[sys] mqtt 연결됨");
 });
 client.on("disconnect", () => {
-  console.log("mqtt 연결 끊김");
+  console.log("[sys] mqtt 연결 끊김");
 });
 
 // subscribe 일괄 적용
@@ -42,9 +45,8 @@ subscribeList.forEach(function (topic) {
   client.subscribe(topic);
 });
 
-// 처음 로딩시 속성과 초기상태 요청
+// 처음 로딩시 속성 요청
 client.publish("req/hue/property", "");
-// client.publish("req/hue/status", "");
 
 // 현재 속성값 전달.
 function getHueProperty() {
@@ -73,16 +75,10 @@ function requestData(pubTopic, pubMessage) {
 }
 
 client.on("message", (topic, message) => {
+  console.log(topic);
   if (topic === "res/hue/property") {
     hueProperty = JSON.parse(message);
-  } else if (topic === "req/dust") {
-    console.log(JSON.parse(message));
   }
-  // } else if (topic === "temperature") {
-  //   console.log(JSON.parse(message));
-  // } else if (topic === "light") {
-  //   console.log(JSON.parse(message));
-  // }
 });
 
 module.exports = {

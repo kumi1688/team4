@@ -4,10 +4,19 @@ var http = require("http").createServer(app);
 var path = require("path");
 var bodyParser = require("body-parser");
 var cors = require("cors");
+var dotenv = require('dotenv');
+dotenv.config();
+
 const websocket = require("./socket");
 
-const lights = require("./routes/light"); //light 라우터
+const hue = require("./routes/hue"); //light 라우터
 const weather = require("./routes/weather"); // weather 라우터
+const light = require('./routes/light');
+const temperature = require('./routes/temperature');
+const co = require('./routes/co');
+const gas = require('./routes/gas');
+const flame = require('./routes/flame');
+const dust = require('./routes/dust');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
@@ -15,10 +24,16 @@ app.use(express.json()); //request body를 json 타입으로 읽기, 만약 선�
 app.use(express.static(path.join(__dirname, "public")));
 app.use(cors());
 
-app.use("/light", lights);
+app.use("/hue", hue);
 app.use("/weather", weather);
+app.use('/dust', dust);
+app.use('/co', co);
+app.use('/light', light);
+app.use('/temperature', temperature);
+app.use('/gas', gas);
+app.use('/flame', flame);
 
-var server = http.listen(8080, function () {
+var server = http.listen(process.env.basePort, function () {
   console.log("Server Created...");
 });
 
