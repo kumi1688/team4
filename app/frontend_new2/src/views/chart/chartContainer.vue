@@ -85,7 +85,7 @@
                   </v-list-item-icon>
                   <v-list-item-content>
                     <h2 class="mx-auto">
-                      <span id="name">{{ nameInDialog[0] }}</span>{{ nameInDialog[1] }} {{ alert.value }} {{ alert.criteria }} 일 때 <span id="notice">알림</span> 설정합니다
+                      <span id="name">{{ nameInDialog[0] }}</span>{{ nameInDialog[1] }} <span id="value">{{ alert.value }}</span> <span id="criteria">{{ alert.criteria }}</span> 일 때 알림 설정합니다
                     </h2>
                   </v-list-item-content>
                   <v-list-item-icon @click="removeAlert(index)">
@@ -141,17 +141,34 @@
 
                 <v-col cols="4">
                   <h2 class="mt-4">
-                    일 때 <span id="notice">알림</span> 설정합니다
+                    일 때 <span
+                      v-if="!alertType"
+                      id="alert"
+                      @click="toggleAlertType"
+                    >알림</span> <span
+                      v-if="alertType"
+                      id="link"
+                      @click="toggleAlertType"
+                    >연동</span> 설정합니다
                   </h2>
                 </v-col>
                 <v-col>
                   <v-icon
-                    v-if="!alertValue[1]"
+                    v-if="!alertValue[1] "
                     size="30"
                     class="mt-4"
                     color="red"
                   >
                     fas fa-plus
+                  </v-icon>
+                  <v-icon
+                    v-else-if="alertType"
+                    size="30"
+                    class="mt-4"
+                    color="blue"
+                    @click="addLink"
+                  >
+                    fas fa-link
                   </v-icon>
                   <v-icon
                     v-else
@@ -198,11 +215,20 @@
         </h2>
       </v-snackbar>
     </v-container>
+    <chart-link-container
+      v-if="linkDialog"
+      @linkDialogClose="linkDialogClose"
+    />
   </v-container>
 </template>
 
 <script>
+  import chartLinkContainer from './chartLinkContainer'
+
   export default {
+    components: {
+      'chart-link-container': chartLinkContainer,
+    },
     props: {
       data: { type: Object, default: undefined },
       options: { type: Object, default: undefined },
@@ -220,6 +246,9 @@
         alertList: [],
         currentValue: null,
         rawData: null,
+        alertType: false,
+        linkList: [],
+        linkDialog: false,
       }
     },
     computed: {
@@ -265,6 +294,12 @@
       this.rawData = this.data.series[0]
     },
     methods: {
+      toggleAlertType () {
+        this.alertType = !this.alertType
+      },
+      addLink () {
+        this.linkDialog = true
+      },
       addAlarm () {
         const newAlarm = {
           value: this.alertValue[0],
@@ -288,6 +323,9 @@
       toggleAlert (index) {
         console.log(this.alertList, this.showAlert[index])
       },
+      linkDialogClose () {
+        this.linkDialog = false
+      },
     },
   }
 </script>
@@ -296,10 +334,19 @@
   #name{
     color: green
   }
-  #notice{
-    color: red
+  #criteria{
+    color: skyblue
+  }
+  #value{
+    color: brown
   }
   #change{
     color: blue
+  }
+  #alert{
+    color: red
+  }
+  #link{
+    color:teal
   }
 </style>
