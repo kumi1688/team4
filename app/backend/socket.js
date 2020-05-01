@@ -1,6 +1,14 @@
 const SocketIO = require("socket.io");
 const { client } = require("./mqtt");
 
+const logger = require('fluent-logger');
+logger.configure('team4', {
+  host: '13.125.207.178',
+  port: 24224,
+  timeout: 3.0,
+  reconnectInterval: 600000
+})
+
 module.exports = (server, app) => {
   const io = SocketIO(server);
 
@@ -20,8 +28,12 @@ module.exports = (server, app) => {
       console.log(`[sys] ${element.name} 네임스페이스 접속!`);
       client.on('message', (topic, message)=> {
         if(topic === `res${element.name}/update`){
-          console.log(`[sys] 웹 소켓으로 ${element.name} 업데이트`);
+          
+          
+          // if(topic === 'res/temperature/update') logger.emit('team4', {temp: data2});
+          // console.log(`[sys] 웹 소켓으로 ${element.name} 업데이트`);
           const data = JSON.parse(message);
+          // logger.emit(data);
           socket.emit('update', JSON.stringify(data));
         }
       })

@@ -3,8 +3,17 @@ var app = express();
 var http = require("http").createServer(app);
 var path = require("path");
 var bodyParser = require("body-parser");
+const fs =require('fs');
 var cors = require("cors");
 var dotenv = require('dotenv');
+// const logger = require('fluent-logger');
+// logger.configure('team4', {
+//   host: '13.125.207.178',
+//   port: 24224,
+//   timeout: 3.0,
+//   reconnectInterval: 600000
+// })
+
 dotenv.config();
 
 const websocket = require("./socket");
@@ -32,6 +41,12 @@ app.use('/light', light);
 app.use('/temperature', temperature);
 app.use('/gas', gas);
 app.use('/flame', flame);
+
+app.get('/', (req, res)=>{
+  const url = req.url;
+  // logger.emit('team4', {recode: 'hello!@#!@#!@#'});
+  res.sendStatus(200);
+})
 
 var server = http.listen(process.env.basePort, function () {
   console.log("Server Created...");
