@@ -15,7 +15,8 @@ let subscribeList = [
   "req/dust",
   "req/temperature/status",
   "req/light/status",
-  'res/dust/update', 'res/light/update', 'res/flame/update', 'res/gas/update', 'res/temperature/update'
+  'res/dust/update', 'res/light/update', 'res/flame/update', 'res/gas/update', 'res/temperature/update',
+  'res/co/update'
 ];
 // publish 할 topic 목록
 let publishList = [
@@ -75,7 +76,7 @@ function requestData(pubTopic, pubMessage) {
 }
 
 client.on("message", (topic, message) => {
-  console.log(topic);
+  // console.log(topic);
   if (topic === "res/hue/property") {
     hueProperty = JSON.parse(message);
   }

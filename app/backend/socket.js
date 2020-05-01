@@ -11,14 +11,14 @@ module.exports = (server, app) => {
   const dust = io.of('/dust');
   const flame = io.of('/flame');
   const gas = io.of('/gas');
+  const co = io.of('/co');
 
-  const socketList = [hue, temperature, light, dust, flame, gas];
+  const socketList = [hue, temperature, light, dust, flame, gas, co];
 
   socketList.forEach(element => {
     element.on('connection', (socket)=> {
       console.log(`[sys] ${element.name} 네임스페이스 접속!`);
       client.on('message', (topic, message)=> {
-        console.log(topic);
         if(topic === `res${element.name}/update`){
           console.log(`[sys] 웹 소켓으로 ${element.name} 업데이트`);
           const data = JSON.parse(message);
