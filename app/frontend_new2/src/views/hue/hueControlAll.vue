@@ -110,7 +110,7 @@
         console.log('요청 일괄 반영')
       },
       reqeustHueChange (hue) {
-        return axios.put(`/api/light/${hue}`, {
+        return axios.put(`/api/hue/${hue}`, {
           on: this.currentPower,
           hue: this.currentHSB.hue,
           sat: this.currentHSB.sat,

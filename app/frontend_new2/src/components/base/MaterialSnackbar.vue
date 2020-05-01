@@ -6,6 +6,7 @@
       ...$attrs,
       'color': 'transparent'
     }"
+    :timeout="timeout"
   >
     <base-material-alert
       v-model="internalValue"
@@ -26,13 +27,17 @@
     props: {
       dismissible: {
         type: Boolean,
-        default: true,
+        default: false,
       },
       type: {
         type: String,
         default: '',
       },
       value: Boolean,
+      timeout: {
+        type: Number,
+        default: 0,
+      },
     },
 
     data () {

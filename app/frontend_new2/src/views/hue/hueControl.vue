@@ -215,7 +215,7 @@
         this.reqeustHueChange()
       },
       reqeustHueChange () {
-        axios.put(`/api/light/${this.huedata.number}`, {
+        axios.put(`/api/hue/${this.huedata.number}`, {
           on: this.currentPower,
           hue: this.currentHSB.hue,
           sat: this.currentHSB.sat,

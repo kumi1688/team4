@@ -72,6 +72,12 @@
       <v-btn text>
         상세 정보
       </v-btn>
+      <v-btn
+        text
+        @click="autoIncrease"
+      >
+        자동 전환
+      </v-btn>
     </v-card-actions>
     <!-- <v-btn @click="()=>{this.loading = !this.loading}">전환</v-btn> -->
   </v-card>
@@ -93,6 +99,7 @@
         selectedTime: 0,
         selectedData: [],
         currentTemperature: null,
+        isAutoIncrease: true,
       }
     },
     computed: {
@@ -125,11 +132,7 @@
         },
       },
     },
-    items () {
-      console.log(this.items)
-    },
     created () {
-      // console.log(this.weatherData)
       const timeList = this.weatherData.data.map(dl => [
         dl.item[0].baseDate,
         dl.item[0].baseTime,
@@ -168,9 +171,18 @@
       this.items = items.filter(item => item.name !== undefined)
       const target = this.items.find(element => element.name === '기온')
       this.currentTemperature = target.value
-      console.log(this.items)
     },
     methods: {
+      autoIncrease () {
+        const auto = setInterval(() => {
+          if (!this.isAutoIncrease) {
+            this.selectedTime = (this.selectedTime + 1) % 8
+          } else {
+            clearInterval(auto)
+          }
+        }, 2000)
+        this.isAutoIncrease = !this.isAutoIncrease
+      },
       setData () {
         const result = this.weatherData.data.find(
           wd => wd.item[0].baseTime === this.timeData.timeList[this.selectedTime],

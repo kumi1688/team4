@@ -16,8 +16,8 @@
           :data="chartData[type]"
           :options="getChartOption(type)"
           :name="type"
+          :color="randomColor(index)"
           hover-reveal
-          color="green"
           type="Line"
         />
       </v-col>
@@ -72,6 +72,16 @@
           series: [[0, 0, 0, 0, 0, 0, 0, 0]],
         },
         properties: {},
+        colors: [
+          'amber',
+          'brown',
+          'orange',
+          'grey',
+          'info',
+          'success',
+          'warning',
+          'error',
+        ],
       }
     },
 
@@ -87,6 +97,9 @@
       this.updateDataWS()
     },
     methods: {
+      randomColor (index) {
+        return this.colors[index]
+      },
       getProperty () {
         this.sensorList.map(async (sensor) => {
           const result = await axios.get(`/api/${sensor}/property`)

@@ -14,6 +14,7 @@
       @closeDialog="closeDialog"
     />
     <v-card
+      v-if="!loading"
       max-width="500"
       class="mx-auto"
     >
@@ -40,7 +41,9 @@
           :key="hue"
         >
           <v-list-item-avatar>
-            <v-icon color="green">
+            <v-icon
+              color="green"
+            >
               far fa-lightbulb
             </v-icon>
           </v-list-item-avatar>
@@ -85,12 +88,14 @@
       },
     },
     data: () => ({
+
       dialog: false,
       hue: -1,
       selectedData: null,
       dialogAll: false,
       numlist: null,
     }),
+
     created () {
       console.log(this.huelist, this.room, this.huedata)
     },

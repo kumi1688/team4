@@ -158,12 +158,12 @@
       },
 
       async getHueProperty () {
-        const result = await axios.get('/api/light/property')
+        const result = await axios.get('/api/hue/property')
         this.property = result.data
         console.log('[sys] hue property 설정 완료')
       },
       async getHueStatus () {
-        const result = await axios.get('/api/light/status')
+        const result = await axios.get('/api/hue/status')
         this.hueDataAll = result.data
         this.hueDataAll.forEach(function (element) {
           const { hue, bri, sat } = element
