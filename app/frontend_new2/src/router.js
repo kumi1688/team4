@@ -19,8 +19,8 @@ export default new Router({
         },
         {
           name: 'Hue',
-          path: 'pages/hue',
-          component: () => import('@/views/hue/hueContainer'),
+          path: 'pages/device',
+          component: () => import('@/views/device/deviceContainer'),
         },
         {
           name: 'weather',

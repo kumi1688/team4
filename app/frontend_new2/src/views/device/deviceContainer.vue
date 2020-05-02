@@ -7,21 +7,33 @@
     <hue-dialog
       v-if="dialog[0]"
       :open="dialog[0]"
-      :property="property"
+      :index="0"
+      :property="property.hue"
       :prlist="roomList"
-      :palist="assignList"
+      :palist="assignList.hue"
+      @closeDialog="closeDialogRoom"
+    />
+    <buzzer-dialog
+      v-if="dialog[1]"
+      :open="dialog[1]"
+      :index="1"
+      :property="property.buzzer"
+      :prlist="roomList"
+      :palist="assignList.buzzer"
       @closeDialog="closeDialogRoom"
     />
     <hue-property
       v-if="dialog[2]"
       :open="dialog[2]"
-      :property="property"
-      @closeDialog="closeDialogProperty"
+      :index="2"
+      :property="property.hue"
+      @closeDialog="closeDialog"
     />
     <carousels
       v-if="dialog[3]"
       :open="dialog[3]"
-      @closeDialog="closeDialogManual"
+      :index="3"
+      @closeDialog="closeDialog"
     />
     <v-row>
       <v-col
@@ -41,11 +53,12 @@
       </v-col>
 
       <v-col
-        v-for="(room) in Object.keys(sortedRoomList)"
+        v-for="room in Object.keys(sortedRoomList.hue)"
         :key="room"
       >
-        <hue-list
-          :huelist="sortedRoomList[room]"
+        <device-list
+          :huelist="sortedRoomList.hue[room]"
+          :buzzerlist="sortedRoomList.buzzer[room]"
           :room="room"
           :huedata="filteredHueData[room]"
         />
@@ -56,26 +69,28 @@
 
 <script>
   import hueProperty from './hueProperty'
+  import buzzerDialog from './buzzerDialog'
   import hueDialog from './hueDialog'
   import carousels from './carousels'
-  import hueList from './hueList'
+  import deviceList from './deviceList'
   import axios from 'axios'
   import io from 'socket.io-client'
   const socket = io(`${process.env.VUE_APP_BACKEND_URL}/hue`)
 
   export default {
-    name: 'HueContainer',
+    name: 'DeviceContainer',
     components: {
-      'hue-list': hueList,
+      'device-list': deviceList,
       'hue-dialog': hueDialog,
       'hue-property': hueProperty,
+      'buzzer-dialog': buzzerDialog,
       carousels: carousels,
     },
     data () {
       return {
         headers: [
-          { color: 'info', title: '전구 분류', icon: 'mdi-folder-settings-outline' },
-          { color: 'info', title: '연결 상태', icon: 'mdi-wifi' },
+          { color: 'info', title: 'Hue 배치', icon: 'mdi-folder-settings-outline' },
+          { color: 'info', title: '부저 배치', icon: 'mdi-alarm-light' },
           { color: 'info', title: 'Hue 속성', icon: 'mdi-information-outline' },
           { color: 'info', title: 'Hue 사용법', icon: 'mdi-bookshelf' },
         ],
@@ -84,83 +99,97 @@
           1: false,
           2: false,
         },
-        property: null,
+        property: {},
         dialog: {
           0: false,
           1: false,
           2: false,
           3: false,
         },
-        assignList: [],
+        assignList: {},
+
         roomList: [],
-        sortedRoomList: {},
+        sortedRoomList: { hue: {}, buzzer: {} },
+        deviceList: null,
         hueDataAll: null,
-        filteredHueData: null,
+        filteredHueData: {},
+        filterdBuzzerData: {},
+        loading: false,
       }
     },
 
     async created () {
-      await this.getHueProperty()
-      this.assignList = new Array(this.property.number.length)
-      for (let i = 0; i < this.assignList.length; i++) {
-        this.assignList[i] = null
-      }
+      await this.getDeviceList()
+      await this.getDeviceProperty()
+      this.initAssignList()
+
       await this.getHueStatus()
-      console.log(this.hueDataAll)
       this.connectWebSocket()
       this.updateHueState()
     },
     methods: {
       filterHueData () {
         const data = {}
-        console.log(this.sortedRoomList)
-        Object.keys(this.sortedRoomList).map(room => {
+        Object.keys(this.sortedRoomList.hue).map(room => {
           data[room] = []
-          this.sortedRoomList[room].map(number => {
+
+          this.sortedRoomList.hue[room].map(number => {
             const idata = this.hueDataAll.find(hda => hda.number === number)
             data[room] = [...data[room], idata]
           })
         })
         return data
       },
-      complete (index) {
-        this.list[index] = !this.list[index]
-      },
       closeDialogRoom (data) {
-        this.dialog[0] = false
-        this.assignList = [...data.assignList]
+        console.log(data)
+        this.dialog[data.index] = false
+        this.assignList[data.type] = [...data.assignList]
         this.roomList = [...data.roomList]
-        console.log(this.assignList, this.roomList)
 
         // 각 방마다 전구 파악 후 배분
         const arr = {}
         this.roomList.forEach(element => {
-          arr[element] = this.assignList.map((al, index) => {
+          arr[element] = this.assignList[data.type].map((al, index) => {
             if (al === element) return index
           })
         })
         Object.keys(arr).forEach(element => {
           arr[element] = arr[element].filter(item => item !== undefined)
-          arr[element] = arr[element].map(item => this.property.number[item])
+          arr[element] = arr[element].map(item => this.property[data.type].number[item])
         })
-        console.log(arr)
-        this.sortedRoomList = arr
-        this.filteredHueData = this.filterHueData()
+
+        this.sortedRoomList[data.type] = arr
+        // console.log(this.sortedRoomList)
+        if (data.type === 'hue') this.filteredHueData = this.filterHueData()
+        console.log('끝')
+        console.log(this.sortedRoomList, this.filteredHueData)
+        // else {
+        //   console.log(this.sortedRoomList)
+        //   this.filterHueData = null
+        // }
       },
-      closeDialogProperty () {
-        this.dialog[2] = false
-      },
-      closeDialogManual () {
-        this.dialog[3] = false
+      closeDialog (index) {
+        this.dialog[index] = false
       },
       openDialog (index) {
         this.dialog[index] = true
       },
-
-      async getHueProperty () {
-        const result = await axios.get('/api/hue/property')
-        this.property = result.data
-        console.log('[sys] hue property 설정 완료')
+      async getDeviceList () {
+        const result = await axios.get('/api/deviceList')
+        this.deviceList = result.data
+      },
+      async getDeviceProperty () {
+        const result = await Promise.all(this.deviceList.map((device) => {
+          return axios.get(`/api/${device}/property`)
+        }))
+        result.map((data, index) => {
+          this.property[this.deviceList[index]] = data.data
+        })
+      },
+      initAssignList () {
+        Object.keys(this.property).map(device => {
+          this.assignList[device] = new Array(this.property[device].number.length)
+        })
       },
       async getHueStatus () {
         const result = await axios.get('/api/hue/status')
@@ -180,7 +209,6 @@
 
           element.colorToString = '#' + arr.join('')
         })
-
         console.log('[sys] hue status 초기 설정 완료')
       },
       compareState (updateData) {
@@ -221,9 +249,6 @@
           console.log('업데이트 됨', JSON.parse(data))
           this.compareState(JSON.parse(data))
         })
-        // socket.on('test', data => {
-        //   console.log('웹소켓 테스트', JSON.parse(data))
-        // })
       },
 
     },

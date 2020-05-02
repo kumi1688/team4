@@ -101,8 +101,8 @@
         },
         {
           icon: 'mdi-lightbulb',
-          title: 'hue',
-          to: '/pages/hue',
+          title: '장치',
+          to: '/pages/device',
         },
         {
           icon: 'mdi-weather-lightning-rainy',

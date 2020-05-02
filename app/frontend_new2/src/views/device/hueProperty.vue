@@ -28,6 +28,10 @@
 <script>
   export default {
     props: {
+      index: {
+        type: Number,
+        default: undefined,
+      },
       property: {
         type: Object,
         default: undefined,
@@ -48,7 +52,7 @@
     methods: {
       onClose () {
         this.dialog = false
-        this.$emit('closeDialog')
+        this.$emit('closeDialog', this.index)
       },
     },
   }

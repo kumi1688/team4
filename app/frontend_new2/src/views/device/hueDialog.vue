@@ -114,6 +114,10 @@
 
   export default {
     props: {
+      index: {
+        type: Number,
+        default: undefined,
+      },
       open: {
         type: Boolean,
         default: undefined,
@@ -177,6 +181,8 @@
         this.$emit('closeDialog', {
           assignList: this.assignList,
           roomList: this.rooms,
+          index: this.index,
+          type: 'hue',
         })
         this.dialog = false
       },

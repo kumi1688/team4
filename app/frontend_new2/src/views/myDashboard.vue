@@ -57,6 +57,7 @@
 
         chartData: {},
         sensorList: ['dust', 'co', 'light', 'temperature', 'gas', 'flame'],
+        actuatorList: ['buzzer', 'hue'],
         loading: false,
         baseData: {
           labels: [

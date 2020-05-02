@@ -1,16 +1,42 @@
 <template>
   <v-dialog
     v-model="dialog"
-    max-width="290"
+    persistent
+    max-width="500"
   >
     <v-card>
       <v-card-title class="headline">
-        Use Google's location service?
+        센서 연동하기
       </v-card-title>
 
-      <v-card-text>
-        Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.
-      </v-card-text>
+      <v-tabs
+        v-model="tab"
+        centered
+        grow
+      >
+        <v-tabs-slider />
+
+        <v-tab
+          v-for="actuator in tabs"
+          :key="actuator"
+          :href="`#tab-${actuator}`"
+        >
+          {{ actuator }}
+        </v-tab>
+
+        <v-tab-item
+          v-for="actuator in tabs"
+          :key="actuator"
+          :value="'tab-' + actuator"
+        >
+          <v-card
+            flat
+            tile
+          >
+            <v-card-text>{{ actuator }}</v-card-text>
+          </v-card>
+        </v-tab-item>
+      </v-tabs>
 
       <v-card-actions>
         <v-spacer />
@@ -40,6 +66,9 @@
     data () {
       return {
         dialog: false,
+        tab: null,
+        tabs: ['Hue', '부저'],
+        icons: true,
       }
     },
     created () {

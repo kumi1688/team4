@@ -14,7 +14,6 @@
       @closeDialog="closeDialog"
     />
     <v-card
-      v-if="!loading"
       max-width="500"
       class="mx-auto"
     >
@@ -86,6 +85,10 @@
         type: Array,
         default: undefined,
       },
+      buzzerlist: {
+        type: Array,
+        default: undefined,
+      },
     },
     data: () => ({
 
@@ -97,7 +100,7 @@
     }),
 
     created () {
-      console.log(this.huelist, this.room, this.huedata)
+      console.log(this.buzzerlist, this.huelist)
     },
     methods: {
       closeDialog () {

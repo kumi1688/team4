@@ -50,12 +50,15 @@
         type: Boolean,
         default: undefined,
       },
+      index: {
+        type: Number,
+        default: undefined,
+      },
     },
     data () {
       return {
         dialog: false,
-        items: [color, comment, hue, hue2, hue3, hue4, hue5,
-        ],
+        items: [color, comment, hue, hue2, hue3, hue4, hue5],
       }
     },
     created () {
@@ -64,7 +67,7 @@
     methods: {
       onClose () {
         this.dialog = false
-        this.$emit('closeDialog')
+        this.$emit('closeDialog', this.index)
       },
     },
   }
