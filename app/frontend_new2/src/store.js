@@ -9,7 +9,11 @@ export default new Vuex.Store({
     barImage:
       'https://demos.creative-tim.com/material-dashboard/assets/img/sidebar-1.jpg',
     drawer: null,
-    rooms: null,
+    rooms: [],
+    devices: [],
+    alerts: {},
+    links: {},
+    messages: {},
   },
   mutations: {
     SET_BAR_IMAGE (state, payload) {
@@ -21,10 +25,36 @@ export default new Vuex.Store({
     SET_ROOMS (state, payload) {
       state.rooms = payload
     },
+    SET_DEVICES (state, payload) {
+      state.devices = payload
+    },
+    SET_ALERTS (state, payload) {
+      const { type, value } = payload
+      state.alerts[type] = [...value]
+    },
+    SET_LINKS (state, payload) {
+      state.links = payload
+    },
+    SET_MESSAGES (state, payload) {
+      const { type, value } = payload
+      state.messages[type] = [...value]
+    },
+    INCREASE_MESSAGE (state, payload) {
+      state.messages[payload] += 1
+    },
   },
   getters: {
-    GET_ROOMS (state) {
+    rooms (state) {
       return state.rooms
+    },
+    devices (state) {
+      return state.devices
+    },
+    alerts (state) {
+      return state.alerts
+    },
+    links (state) {
+      return state.links
     },
   },
   actions: {},

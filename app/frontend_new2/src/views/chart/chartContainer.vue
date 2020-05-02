@@ -186,11 +186,16 @@
         </template>
         <v-card-text class="pb-6 pt-12 text-center">
           <v-btn
+            color="red"
+            @click="removeAllAlert"
+          >
+            초기화
+          </v-btn>
+          <v-btn
             color="success"
-            text
             @click="dialog = false"
           >
-            설정
+            닫기
           </v-btn>
         </v-card-text>
       </v-card>
@@ -285,10 +290,29 @@
         },
       },
     },
+    beforeDestroy () {
+      this.$store.commit('SET_ALERTS', { type: this.name, value: this.alertList })
+      this.$store.commit('SET_MESSAGES', { type: this.name, value: this.messages })
+    },
     created () {
       this.rawData = this.data.series[0]
       this.alertValue[0] = (this.options.low + this.options.high) / 2
       this.currentValue = this.data.series[0][this.data.series.length - 1]
+
+      if (this.$store.state.alerts[this.name] === undefined) {
+        this.alertList = []
+      } else {
+        this.alertList = this.$store.state.alerts[this.name]
+      }
+      if (this.$store.state.messages[this.name] === undefined) {
+        this.messages = []
+      } else {
+        this.messages = this.$store.state.messages[this.name]
+      }
+
+      this.messages.map(msg => {
+        this.totalMessage += msg
+      })
     },
     beforeUpdate () {
       this.rawData = this.data.series[0]
@@ -320,8 +344,14 @@
         this.showAlert = [...this.showAlert.slice(0, index), ...this.alertList.slice(index + 1)]
         this.messages = [...this.messages.slice(0, index), ...this.messages.slice(index + 1)]
       },
+      removeAllAlert () {
+        this.totalMessage = 0
+        this.alertList = []
+        this.messages = []
+        this.showAlert = []
+      },
       toggleAlert (index) {
-        console.log(this.alertList, this.showAlert[index])
+        // console.log(this.alertList, this.showAlert[index])
       },
       linkDialogClose () {
         this.linkDialog = false

@@ -56,7 +56,7 @@
         },
 
         chartData: {},
-        sensorList: ['temperature', 'light', 'dust', 'gas', 'flame', 'co'],
+        sensorList: ['dust', 'co', 'light', 'temperature', 'gas', 'flame'],
         loading: false,
         baseData: {
           labels: [
@@ -84,26 +84,26 @@
         ],
       }
     },
-
     created () {
       this.getProperty()
+      this.setBaseChartData()
       this.connectWebSocket()
-
-      this.sensorList.map(element => {
-        // shallow copy 때문에 series[0]은 분해해서 복사
-        this.chartData[element] = { ...this.baseData, series: [...this.baseData.series] }
-      })
-
       this.updateDataWS()
     },
     methods: {
       randomColor (index) {
         return this.colors[index]
       },
-      getProperty () {
+      async getProperty () {
         this.sensorList.map(async (sensor) => {
           const result = await axios.get(`/api/${sensor}/property`)
           this.properties[sensor] = result.data
+        })
+      },
+      setBaseChartData () {
+        this.sensorList.map(element => {
+          // shallow copy 때문에 series[0]은 분해해서 복사
+          this.chartData[element] = { ...this.baseData, series: [...this.baseData.series] }
         })
       },
       getChartOption (type) {
