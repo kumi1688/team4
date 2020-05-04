@@ -56,6 +56,7 @@
         },
 
         chartData: {},
+        // sensorList: null,
         sensorList: ['dust', 'co', 'light', 'temperature', 'gas', 'flame'],
         actuatorList: ['buzzer', 'hue'],
         loading: false,
@@ -85,31 +86,43 @@
         ],
       }
     },
-    created () {
+    async created () {
+      this.loading = true
+      this.getSensorList()
       this.getProperty()
+
       this.setBaseChartData()
       this.connectWebSocket()
       this.updateDataWS()
+      this.loading = false
     },
     methods: {
       randomColor (index) {
         return this.colors[index]
       },
+      async getSensorList () {
+        const result = await axios.get('/api/sensorList')
+        this.sensorList = result.data
+      },
       async getProperty () {
-        this.sensorList.map(async (sensor) => {
-          const result = await axios.get(`/api/${sensor}/property`)
-          this.properties[sensor] = result.data
+        const result = await Promise.all(this.sensorList.map(sensor => {
+          return axios.get(`/api/${sensor}/property`)
+        }))
+        result.map((property, index) => {
+          this.properties[this.sensorList[index]] = property.data
         })
       },
       setBaseChartData () {
-        this.sensorList.map(element => {
+        this.sensorList.map(sensor => {
           // shallow copy 때문에 series[0]은 분해해서 복사
-          this.chartData[element] = { ...this.baseData, series: [...this.baseData.series] }
+
+          this.chartData[sensor] = { ...this.baseData, series: [...this.baseData.series] }
         })
       },
-      getChartOption (type) {
-        if (this.properties[type] !== undefined) {
-          const options = { ...this.baseChartOption.options, low: this.properties[type].min, high: this.properties[type].max }
+      getChartOption (sensor) {
+        if (this.properties[sensor] !== undefined) {
+          const options = { ...this.baseChartOption.options, low: this.properties[sensor].min, high: this.properties[sensor].max }
+
           return options
         }
         return this.baseChartOption.options

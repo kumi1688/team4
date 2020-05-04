@@ -1,5 +1,6 @@
 <template>
   <v-container
+    v-if="!loading"
     id="dashboard"
     fluid
     tag="section"
@@ -53,7 +54,7 @@
       </v-col>
 
       <v-col
-        v-for="room in Object.keys(sortedRoomList.hue)"
+        v-for="room in roomSet"
         :key="room"
       >
         <device-list
@@ -110,6 +111,7 @@
 
         roomList: [],
         sortedRoomList: { hue: {}, buzzer: {} },
+        roomSet: [],
         deviceList: null,
         hueDataAll: null,
         filteredHueData: {},
@@ -119,6 +121,7 @@
     },
 
     async created () {
+      this.loading = true
       await this.getDeviceList()
       await this.getDeviceProperty()
       this.initAssignList()
@@ -126,6 +129,12 @@
       await this.getHueStatus()
       this.connectWebSocket()
       this.updateHueState()
+      this.loading = false
+    },
+    beforeDestroy () {
+      this.$store.commit('SET_DEVICES', {
+
+      })
     },
     methods: {
       filterHueData () {
@@ -141,7 +150,6 @@
         return data
       },
       closeDialogRoom (data) {
-        console.log(data)
         this.dialog[data.index] = false
         this.assignList[data.type] = [...data.assignList]
         this.roomList = [...data.roomList]
@@ -159,14 +167,10 @@
         })
 
         this.sortedRoomList[data.type] = arr
-        // console.log(this.sortedRoomList)
+
         if (data.type === 'hue') this.filteredHueData = this.filterHueData()
-        console.log('끝')
-        console.log(this.sortedRoomList, this.filteredHueData)
-        // else {
-        //   console.log(this.sortedRoomList)
-        //   this.filterHueData = null
-        // }
+        this.roomSet = new Set([...Object.keys(this.sortedRoomList.hue), ...Object.keys(this.sortedRoomList.buzzer)])
+        this.roomSet = [...this.roomSet]
       },
       closeDialog (index) {
         this.dialog[index] = false
@@ -236,7 +240,7 @@
             element.colorToString = '#' + arr.join('')
           }
         })
-        //   console.log(this.hueDataAll);
+
         this.isUpdate = true
       },
       connectWebSocket () {

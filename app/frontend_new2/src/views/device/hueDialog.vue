@@ -24,10 +24,10 @@
                   v-for="(item, i) in rooms"
                   :key="i"
                 >
-                  <v-list-item-content>
+                  <v-list-item-content @click="setCurrentRoom(item)">
                     <v-list-item-title
                       class="display-2"
-                      @click="setCurrentRoom(item)"
+
                       v-text="item"
                     />
                   </v-list-item-content>

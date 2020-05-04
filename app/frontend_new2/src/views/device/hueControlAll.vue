@@ -95,6 +95,7 @@
     },
     created () {
       this.dialog = this.open
+      // this.currentPower = true
     },
     methods: {
       closeDialog () {
