@@ -108,6 +108,7 @@
       },
       async requestAll () {
         await Promise.all(this.numlist.map(el => this.reqeustHueChange(el)))
+        await Promise.all(this.numlist.map(el => this.requestCtChange(el)))
         console.log('요청 일괄 반영')
       },
       reqeustHueChange (hue) {
@@ -116,6 +117,10 @@
           hue: this.currentHSB.hue,
           sat: this.currentHSB.sat,
           bri: this.currentHSB.bri,
+        })
+      },
+      requestCtChange (hue) {
+        return axios.put(`/api/hue/${hue}`, {
           ct: this.currentTemperature,
         })
       },

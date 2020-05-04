@@ -54,11 +54,16 @@
           :key="hue"
         >
           <v-list-item-avatar>
-            <v-icon
-              :color="getHueIconColor(hue)"
+            <v-badge
+              dot
+              :color="getHuePowerIconColor(hue)"
             >
-              far fa-lightbulb
-            </v-icon>
+              <v-icon
+                :color="getHueStatusIconColor(hue)"
+              >
+                far fa-lightbulb
+              </v-icon>
+            </v-badge>
           </v-list-item-avatar>
 
           <v-list-item-content>
@@ -70,6 +75,7 @@
           <v-icon @click="openHueTimerDialog(hue)">
             far fa-clock
           </v-icon>
+
           <v-icon
             class="ml-2"
             @click="openHueDialog(hue)"
@@ -110,6 +116,7 @@
   import hueControl from './hueControl'
   import hueControlAll from './hueControlAll'
   import timerContainer from './timerContainer'
+  import { hsbToRgb } from './rgbToHsv'
 
   export default {
     components: {
@@ -151,18 +158,20 @@
     },
     created () {
       console.log(this.buzzerlist, this.huelist)
-      this.getHueIconColor()
     },
     methods: {
-      getHueIconColor (hue) {
+      getHuePowerIconColor (hue) {
         const result = this.huedata.find(hd => hd.number === hue)
-        // console.log(result)
         if (result && result.on) return 'green'
         else return 'red'
-        // setInterval(() => {
-        //   if (this.hueIconColor === 'green') this.hueIconColor = 'red'
-        //   else this.hueIconColor = 'green'
-        // }, 500)
+      },
+      getHueStatusIconColor (hue) {
+        const target = this.huedata.find(hd => hd.number === hue)
+
+        if (!target.on) return 'black'
+        const currentColor = hsbToRgb(target.hue, target.sat, target.bri)
+        console.log(currentColor)
+        return `rgba(${currentColor[0]}, ${currentColor[1]}, ${currentColor[2]}, 1)`
       },
       openHueTimerDialog (hue) {
         if (hue !== -1) {

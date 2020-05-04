@@ -85,6 +85,7 @@
     },
     watch: {
       updateValue () {
+        console.log('업데이트', this.updateValue)
         this.sliderValue = this.updateValue
       },
     },
@@ -92,6 +93,7 @@
       this.getMinMax()
       this.getStep()
       this.initData()
+      console.log(this.type, this.sliderValue)
       this.setToolTipImage()
     },
     methods: {

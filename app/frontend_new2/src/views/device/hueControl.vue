@@ -110,7 +110,7 @@
                   hide-mode-switch
                   swatches-max-height="300px"
                   width="450"
-                  @input="setColor"
+                  @update:color="initColor"
                 />
                 <v-dialog
                   ref="dialog"
@@ -186,7 +186,7 @@
                 />
               </v-row>
 
-              <v-row>
+              <v-row justify="center">
                 <v-card-actions>
                   <v-spacer />
                   <v-icon
@@ -217,7 +217,7 @@
 <script>
   import axios from 'axios'
   import hueControlToolTip from './hueControltoolTip'
-  import { rgbToHsvString } from './rgbToHsv'
+  import { rgbToHsvString, hsbToRgb } from './rgbToHsv'
 
   export default {
     components: {
@@ -270,6 +270,9 @@
 
     },
     watch: {
+      currentRGB () {
+
+      },
       // currentTemperature () {
       //   const value = (this.currentTemperature - 2000) / 13 + 153
       //   this.requestChange('ct', value)
@@ -293,14 +296,29 @@
         sat: this.huedata.sat,
         bri: this.huedata.bri,
       }
+      this.initColor()
 
+      console.log(this.huedata)
       this.currentPower = this.huedata.on
+
       this.currentTemperature = (this.huedata.ct - 153) * 13 + 2000
       this.currentSaturation = this.huedata.sat / (2.5)
       this.currentBrightness = this.huedata.bri / (2.5)
       this.loading = false
     },
     methods: {
+      initColor () {
+        const result = hsbToRgb(this.huedata.hue, this.huedata.sat, this.huedata.bri)
+        this.currentRGB = {
+          ...this.currentRGB,
+          rgba: {
+            a: 1,
+            b: result[2],
+            g: result[1],
+            r: result[0],
+          },
+        }
+      },
       setValue (type, value) {
         this[type] += value
       },
@@ -310,6 +328,7 @@
       },
       setColor () {
         this.colorLoading = true
+        console.log(this.currentRGB)
         this.currentHSB = rgbToHsvString(this.currentRGB)
         this.currentSaturation = this.currentHSB.sat / (2.5)
         this.currentBrightness = this.currentHSB.bri / (2.5)
@@ -329,8 +348,7 @@
         const data = { on: this.currentPower }
         data[type] = Math.floor(value)
         await axios.put(`/api/hue/${this.huedata.number}`, data)
-        console.log(data)
-        delete data[type]
+
         console.log('요청 반영됨2')
       },
       switchPower () {
