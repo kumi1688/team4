@@ -298,7 +298,6 @@
       }
       this.initColor()
 
-      console.log(this.huedata)
       this.currentPower = this.huedata.on
 
       this.currentTemperature = (this.huedata.ct - 153) * 13 + 2000

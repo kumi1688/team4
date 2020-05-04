@@ -108,7 +108,6 @@
           3: false,
         },
         assignList: {},
-
         roomList: [],
         sortedRoomList: { hue: {}, buzzer: {} },
         roomSet: [],
@@ -124,32 +123,48 @@
       this.loading = true
       await this.getDeviceList()
       await this.getDeviceProperty()
-      this.initAssignList()
 
       await this.getHueStatus()
+
+      this.initRooms()
+      this.initAssignList()
+
       this.connectWebSocket()
       this.updateHueState()
       this.loading = false
     },
     beforeDestroy () {
-      this.$store.commit('SET_DEVICES', {
+      this.$store.commit('SET_ASSIGN_INFO', {
+        roomList: this.sortedRoomList,
+        assignList: this.assignList,
 
       })
+      this.$store.commit('SET_ROOMS', this.roomSet)
     },
     methods: {
+      initRooms () {
+        this.sortedRoomList = this.$store.state.assignInfo.roomList || { hue: {}, buzzer: {} }
+        this.roomSet = this.$store.state.rooms || []
+        this.assignList = this.$store.state.assignInfo.assignList || {}
+
+        if (this.roomSet.length !== 0) this.filteredHueData = this.filterHueData()
+      },
       filterHueData () {
         const data = {}
         Object.keys(this.sortedRoomList.hue).map(room => {
           data[room] = []
 
           this.sortedRoomList.hue[room].map(number => {
+            // console.log(number, this.hueDataAll)
             const idata = this.hueDataAll.find(hda => hda.number === number)
             data[room] = [...data[room], idata]
           })
         })
+        console.log(data)
         return data
       },
       closeDialogRoom (data) {
+        console.log(data)
         this.dialog[data.index] = false
         this.assignList[data.type] = [...data.assignList]
         this.roomList = [...data.roomList]
@@ -161,6 +176,7 @@
             if (al === element) return index
           })
         })
+
         Object.keys(arr).forEach(element => {
           arr[element] = arr[element].filter(item => item !== undefined)
           arr[element] = arr[element].map(item => this.property[data.type].number[item])
@@ -169,6 +185,7 @@
         this.sortedRoomList[data.type] = arr
 
         if (data.type === 'hue') this.filteredHueData = this.filterHueData()
+        console.log(this.sortedRoomList)
         this.roomSet = new Set([...Object.keys(this.sortedRoomList.hue), ...Object.keys(this.sortedRoomList.buzzer)])
         this.roomSet = [...this.roomSet]
       },
@@ -192,7 +209,7 @@
       },
       initAssignList () {
         Object.keys(this.property).map(device => {
-          this.assignList[device] = new Array(this.property[device].number.length)
+          if (!this.assignList[device]) this.assignList[device] = new Array(this.property[device].number.length)
         })
       },
       async getHueStatus () {

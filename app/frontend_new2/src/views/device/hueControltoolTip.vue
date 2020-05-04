@@ -1,48 +1,50 @@
 <template>
-  <v-tooltip
-    v-model="tooltip"
-    left
-  >
-    <template>
-      <h2
-        slot="activator"
-        class="display-2 mt-5"
-        @mouseover="tooltip = true"
-        @mouseout="tooltip = false"
-      >
-        {{ tooltipName }}
-      </h2>
-      <v-icon
-        slot="activator"
-        size="50"
-        color="blue"
-        @click="setValue('btn', type, step)"
-      >
-        mdi-plus
-      </v-icon>
-      <v-slider
-        slot="activator"
-        v-model="sliderValue"
-        class="mt-5"
-        thumb-label="always"
-        :min="min"
-        :max="max"
-        @mouseup="setValue('slider', type, step)"
-      />
-      <!-- 153 (6500K) to 500 (2000K). -->
-      <v-icon
-        slot="activator"
-        size="50"
-        color="red"
-        @click="setValue('btn', type, -step,)"
-      >
-        mdi-minus
-      </v-icon>
-      <v-img
-        :src="tooltipImage"
-      />
-    </template>
-  </v-tooltip>
+  <v-row>
+    <v-tooltip
+      v-model="tooltip"
+      left
+    >
+      <template>
+        <h2
+          slot="activator"
+          class="display-2 mt-5"
+          @mouseover="tooltip = true"
+          @mouseout="tooltip = false"
+        >
+          {{ tooltipName }}
+        </h2>
+        <v-icon
+          slot="activator"
+          size="50"
+          color="blue"
+          @click="setValue('btn', type, step)"
+        >
+          mdi-plus
+        </v-icon>
+        <v-slider
+          slot="activator"
+          v-model="sliderValue"
+          class="mt-5"
+          thumb-label="always"
+          :min="min"
+          :max="max"
+          @mouseup="setValue('slider', type, step)"
+        />
+        <!-- 153 (6500K) to 500 (2000K). -->
+        <v-icon
+          slot="activator"
+          size="50"
+          color="red"
+          @click="setValue('btn', type, -step,)"
+        >
+          mdi-minus
+        </v-icon>
+        <v-img
+          :src="tooltipImage"
+        />
+      </template>
+    </v-tooltip>
+  </v-row>
 </template>
 
 <script>
@@ -93,7 +95,6 @@
       this.getMinMax()
       this.getStep()
       this.initData()
-      console.log(this.type, this.sliderValue)
       this.setToolTipImage()
     },
     methods: {

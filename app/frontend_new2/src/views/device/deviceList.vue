@@ -157,7 +157,7 @@
       },
     },
     created () {
-      console.log(this.buzzerlist, this.huelist)
+
     },
     methods: {
       getHuePowerIconColor (hue) {
@@ -170,7 +170,6 @@
 
         if (!target.on) return 'black'
         const currentColor = hsbToRgb(target.hue, target.sat, target.bri)
-        console.log(currentColor)
         return `rgba(${currentColor[0]}, ${currentColor[1]}, ${currentColor[2]}, 1)`
       },
       openHueTimerDialog (hue) {

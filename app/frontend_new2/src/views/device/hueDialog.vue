@@ -174,7 +174,7 @@
           this.assignList[i] = null
         }
       }
-      console.log(this.checkBox, this.assignList)
+      // console.log(this.checkBox, this.assignList)
     },
     methods: {
       onClose () {
@@ -199,7 +199,7 @@
             this.checkBox[i] = false
           }
         }
-        console.log(this.assignList, this.checkBox)
+        // console.log(this.assignList, this.checkBox)
         this.rooms = [
           ...this.rooms.slice(0, index),
           ...this.rooms.slice(index + 1),

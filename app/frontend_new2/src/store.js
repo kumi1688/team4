@@ -11,6 +11,7 @@ export default new Vuex.Store({
     drawer: null,
     rooms: [],
     devices: [],
+    assignInfo: {},
     alerts: {},
     links: {},
     messages: {},
@@ -34,6 +35,9 @@ export default new Vuex.Store({
     },
     SET_LINKS (state, payload) {
       state.links = payload
+    },
+    SET_ASSIGN_INFO (state, payload) {
+      state.assignInfo = payload
     },
     SET_MESSAGES (state, payload) {
       const { type, value } = payload
