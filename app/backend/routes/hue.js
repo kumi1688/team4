@@ -32,23 +32,35 @@ router.post('/:id', function(req, res){
   const id = req.params.id;
   const sendData = {...req.body, id: id, valid: true};
   
-  
   alertList= [...alertList, sendData];
+  res.sendStatus(200);
 })
 
 setInterval(()=>{
   alertList.forEach(alert => {
-    console.log(alert)
     if(alert.value > 0) alert.value -= 1;
     else if ( alert.value === 0 && alert.valid){
       alert.valid = false
       const sendData = {...alert};
+      console.log(sendData)
+      if(sendData.type && sendData.type !== 'color') sendData[sendData.type] = sendData.optionValue
+      else if (sendData.type === 'color') {
+        sendData.hue = sendData.optionValue.hue;
+        sendData.sat = sendData.optionValue.sat;
+        sendData.bri = sendData.optionValue.bri;
+      }
+
       delete sendData.id
-      delete sendData.valid
-      console.log(alert.id, sendData);
+      delete sendData.valid;
+      delete sendData.type;
+      delete sendData.value;
+      delete sendData.optionValue;
+      
+      console.log(sendData);
       client.publish(`req/hue/changeStatus/${alert.id}`, JSON.stringify(sendData))
     }
   })
+  alertList = alertList.filter(alert => alert.valid)
 }, 1000);
 
 module.exports = router;
