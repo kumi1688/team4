@@ -26,6 +26,7 @@ const co = require('./routes/co');
 const gas = require('./routes/gas');
 const flame = require('./routes/flame');
 const dust = require('./routes/dust');
+const buzzer = require('./routes/buzzer');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
@@ -41,11 +42,16 @@ app.use('/light', light);
 app.use('/temperature', temperature);
 app.use('/gas', gas);
 app.use('/flame', flame);
+app.use('/buzzer', buzzer);
 
-app.get('/', (req, res)=>{
-  const url = req.url;
-  // logger.emit('team4', {recode: 'hello!@#!@#!@#'});
-  res.sendStatus(200);
+app.get('/sensorList', (req, res)=>{
+  const sensorList = ['dust', 'co', 'light', 'temperature', 'gas', 'flame'];
+  res.send(sensorList);
+})
+
+app.get('/deviceList', (req, res)=>{
+  const deviceList = ['hue', 'buzzer'];
+  res.send(deviceList);
 })
 
 var server = http.listen(process.env.basePort, function () {
