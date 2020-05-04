@@ -130,7 +130,7 @@
                       색 설정
                     </v-btn>
                   </template>
-                  <card>
+                  <v-card>
                     <v-color-picker
                       v-model="currentRGB"
                       class="ma-2"
@@ -156,7 +156,7 @@
                         설정
                       </v-btn>
                     </v-card-actions>
-                  </card>
+                  </v-card>
                 </v-dialog>
               </v-row>
 

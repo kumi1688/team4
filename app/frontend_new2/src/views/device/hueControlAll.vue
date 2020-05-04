@@ -8,49 +8,112 @@
       <v-card
         height="600"
       >
-        <template>
-          <v-row justify="space-around">
+        <v-col>
+          <v-row>
+            <h2 class="display-2">
+              색 설정
+            </h2>
             <v-color-picker
               v-model="currentRGB"
-              class="ma-2"
+              class="ml-10"
               hide-canvas
               hide-inputs
-              show-swatches
               hide-mode-switch
               swatches-max-height="300px"
               width="450"
-              @input="setColor"
+            />
+            <v-dialog
+              ref="dialog"
+              v-model="modal2"
+              persistent
+              width="290px"
+            >
+              <template
+                v-slot:activator="{ on }"
+              >
+                <v-btn
+                  class="ml-10"
+                  color="indigo"
+                  v-on="on"
+                >
+                  색 설정
+                </v-btn>
+              </template>
+              <v-card>
+                <v-color-picker
+                  v-model="currentRGB"
+                  class="ma-2"
+                  show-swatches
+                  hide-canvas
+                  hide-inputs
+                  hide-mode-switch
+                  swatches-max-height="300px"
+                  width="450"
+                  @input="setColor"
+                />
+                <v-card-actions>
+                  <v-btn
+                    color="green"
+                    @click="modal2 = false"
+                  >
+                    닫기
+                  </v-btn>
+                  <v-btn
+                    color="green"
+                  >
+                    설정
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+          </v-row>
+
+          <v-row class="mt-5">
+            <hue-control-tool-tip
+              type="ct"
+              :ct="currentTemperature"
+              @requestChange="requestAll"
             />
           </v-row>
-        </template>
-        <v-slider
-          v-model="currentTemperature"
-          sm="3"
-          min="153"
-          max="500"
-          thumb-label="always"
-          prepend-icon="mdi-alarm-light"
-          append-icon="mdi-alarm-light-outline"
-        />
-        <v-card-actions>
-          <v-spacer />
-          <v-icon
-            class="mr-10 pr-10"
-            size="90"
-            :color="currentPower ? 'green' : 'red'"
-            @click="switchPower"
-          >
-            fas fa-power-off
-          </v-icon>
 
-          <v-btn
-            color="green darken-1"
-            text
-            @click="closeDialog"
-          >
-            닫기
-          </v-btn>
-        </v-card-actions>
+          <v-row class="mt-5">
+            <hue-control-tool-tip
+
+              type="sat"
+              :sat="currentSaturation"
+              @requestChange="requestAll"
+            />
+          </v-row>
+
+          <v-row class="mt-5">
+            <hue-control-tool-tip
+              type="bri"
+              :bri="currentBrightness"
+              @requestChange="requestAll"
+            />
+          </v-row>
+
+          <v-row justify="center">
+            <v-card-actions>
+              <v-spacer />
+              <v-icon
+                class="mr-10 pr-10"
+                size="90"
+                :color="currentPower ? 'green' : 'red'"
+                @click="switchPower"
+              >
+                fas fa-power-off
+              </v-icon>
+
+              <v-btn
+                color="green darken-1"
+                @click="closeDialog"
+              >
+                닫기
+              </v-btn>
+            </v-card-actions>
+          </v-row>
+        </v-col>
       </v-card>
     </v-dialog>
   </v-row>
@@ -59,8 +122,12 @@
 <script>
   import axios from 'axios'
   import { rgbToHsvString } from './rgbToHsv'
+  import hueControlToolTip from './hueControltoolTip'
 
   export default {
+    components: {
+      'hue-control-tool-tip': hueControlToolTip,
+    },
     props: {
       open: {
         type: Boolean,
@@ -76,8 +143,11 @@
         currentHSB: null,
         currentRGB: null,
         currentPower: null,
-        currentTemperature: null,
+        currentTemperature: 2000,
+        currentSaturation: 0,
+        currentBrightness: 0,
         dialog: false,
+        modal2: false,
         swatches: [
           ['#FF0000', '#AA0000', '#550000'],
           ['#FFFF00', '#AAAA00', '#555500'],
@@ -88,13 +158,9 @@
 
       }
     },
-    watch: {
-      currentTemperature () {
-        this.requestAll()
-      },
-    },
     created () {
       this.dialog = this.open
+      console.log(this.numlist)
     },
     methods: {
       closeDialog () {
@@ -103,30 +169,34 @@
       },
       setColor () {
         this.currentHSB = rgbToHsvString(this.currentRGB)
-        this.requestAll()
+        this.requestAll('color')
       },
-      async requestAll () {
-        await Promise.all(this.numlist.map(el => this.reqeustHueChange(el)))
-        await Promise.all(this.numlist.map(el => this.requestCtChange(el)))
+      async requestAll (type, value) {
+        if (type === 'color') {
+          const data = {
+            on: this.currentPower,
+            hue: this.currentHSB.hue,
+            sat: this.currentHSB.sat,
+            bri: this.currentHSB.bri,
+          }
+
+          await Promise.all(this.numlist.map(hue => this.requestHueChange(hue, data)))
+        } else {
+          const data = { on: this.currentPower }
+          data[type] = Math.floor(value)
+          await Promise.all(this.numlist.map(hue => this.requestHueChange(hue, data)))
+        }
+
         console.log('요청 일괄 반영')
       },
-      reqeustHueChange (hue) {
-        return axios.put(`/api/hue/${hue}`, {
-          on: this.currentPower,
-          hue: this.currentHSB.hue,
-          sat: this.currentHSB.sat,
-          bri: this.currentHSB.bri,
-        })
-      },
-      requestCtChange (hue) {
-        return axios.put(`/api/hue/${hue}`, {
-          ct: this.currentTemperature,
-        })
+      requestHueChange (hue, data) {
+        return axios.put(`/api/hue/${hue}`, data)
       },
       switchPower () {
         this.currentPower = !this.currentPower
         this.requestAll()
       },
+
     },
   }
 </script>
