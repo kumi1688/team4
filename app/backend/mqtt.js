@@ -32,7 +32,7 @@ let hueProperty = {};
 
 //mqtt 연결
 const client = mqtt.connect(options);
-client.setMaxListeners(30);
+client.setMaxListeners(60);
 
 client.on("connect", () => {
   console.log("[sys] mqtt 연결됨");

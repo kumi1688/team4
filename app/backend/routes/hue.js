@@ -20,13 +20,20 @@ router.get("/status", async function (req, res) {
 });
 
 // 상태 변경
-router.put("/:id", function (req, res) {
+router.put("/change/:id", function (req, res) {
   const id = req.params.id;
   const sendData = { ...req.body };
 
   client.publish(`req/hue/changeStatus/${id}`, JSON.stringify(sendData));
-  res.send("ok");
+  res.sendStatus(200);
 });
+
+router.put('/changeAll', function(req,res){
+  const sendData = {...req.body};
+  console.log(sendData)
+  client.publish(`req/hue/changeAllStatus`, JSON.stringify(sendData));
+  res.sendStatus(200);
+})
 
 router.post('/:id', function(req, res){
   const id = req.params.id;
