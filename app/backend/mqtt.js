@@ -8,21 +8,26 @@ const options = {
 // subscribe 할 topic 목록
 const subscribeList = [
   "res/hue/property", // 속성 정보 요청 응답
-  "res/hue/status2", // 현재 상태 정보 요청 응답
+  "res/hue/status", // 현재 상태 정보 요청 응답
   "res/hue/update", // hue 쪽에서 상태값이 변경될 때 마다 상태값 받음
   "res/weather/weather", // 현재 날씨 요청 응답
   "res/weather/dust", // 미세 먼지 요청 응답
   "req/dust",
+  'res/hue/changeStatus/+',
   "req/temperature/status",
   "req/light/status",
   'res/dust/update', 'res/light/update', 'res/flame/update', 'res/gas/update', 'res/temperature/update',
-  'res/co/update'
+  'res/co/update',
+
+  'clova/req/hue/status',
+  'clova/req/hue/changeStatus/+'
+
 ];
 
 // publish 할 topic 목록
 let publishList = [
   "req/hue/property", // 속성 정보 요청
-  "req/hue/status", // 현재 상태 정보 요청
+  "req/hue/status/+", // 현재 상태 정보 요청
   "req/hue/changeStatus/+", // 현재 상태 변경 요청
   "req/weather/dust", // 미세먼지 요청
   "req/weather/weather", // 현재 날씨 요청
@@ -46,9 +51,7 @@ client.on("disconnect", () => {
 subscribeList.forEach(function (topic) {
   client.subscribe(topic);
 });
-clovaSubscribeList.forEach(function(topic){
-  client.subscribe(topic)
-})
+
 
 // 처음 로딩시 속성 요청
 client.publish("req/hue/property", "");
@@ -79,12 +82,30 @@ function requestData(pubTopic, pubMessage) {
   });
 }
 
-client.on("message", (topic, message) => {
-  // console.log(topic);
-  if (topic === "res/hue/property") {
-    hueProperty = JSON.parse(message);
-  }
-});
+client.on('message', async (topic, message) => {
+    const clovaTopic = topic.split('/');
+    // console.log(topic)
+    if(clovaTopic[0] === 'clova'){
+      if(topic === 'clova/req/hue/status'){
+        const result = await requestData(clovaTopic.slice(1).join('/'));
+        const pubTopic = ['clova', 'res', ...clovaTopic.slice(2)].join('/');
+        client.publish(pubTopic, JSON.stringify(result));        
+      } else if ( topic === 'clova/req/hue/changeStatus'){
+        console.log('나는 9번이다')
+        const result = await requestData(clovaTopic.slice(1).join('/'));
+        const pubTopic = ['clova', 'res', ...clovaTopic.slice(2)].join('/');
+        client.publish(pubTopic, JSON.stringify(result));        
+      } else{
+        const data = JSON.parse(message);
+        const result = await requestData(clovaTopic.slice(1).join('/'), JSON.stringify(data));
+        const pubTopic = ['clova', 'res', ...clovaTopic.slice(2)].join('/');
+        client.publish(pubTopic, JSON.stringify(result));
+      }
+
+    } else if (topic === "res/hue/property") {
+      hueProperty = JSON.parse(message);
+    }
+})
 
 module.exports = {
   client,
