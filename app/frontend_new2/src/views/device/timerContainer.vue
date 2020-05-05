@@ -7,7 +7,7 @@
     <v-card>
       <v-dialog
         v-model="dialog"
-        max-width="1000"
+        max-width="900"
       >
         <v-card>
           <v-card-title class="display-3">
@@ -35,7 +35,7 @@
                     </v-list-item-icon>
                     <v-list-item-content>
                       <h2 class="mx-auto">
-                        <span class="value">{{ alert.value }}</span> <span id="timeUnit">{{ alert.timeUnit }}</span> 후에 <span class="typeUnit"> {{ alert.typeUnit }} </span> <span class="commandUnit"> {{ alert.commandUnit }} </span>
+                        <span class="value">{{ alert.value }}</span> <span id="timeUnit">{{ alert.timeUnit }}</span> 후에 {{ hueNumber }} 전구<span class="typeUnit"> {{ alert.typeUnit }} </span> <span class="commandUnit"> {{ alert.commandUnit }} </span>
                       </h2>
                     </v-list-item-content>
                     <v-list-item-icon @click="removeAlert(index)">
@@ -48,11 +48,11 @@
               </v-list>
             </v-card>
           </v-row>
-          <v-row justify="start">
+          <v-row justify="center">
             <v-col cols="2">
               <v-text-field
                 v-model="currentTimeValue"
-                class="ml-4"
+                class="mx-auto"
               >
                 <v-icon
                   slot="append"
@@ -70,86 +70,87 @@
                 </v-icon>
               </v-text-field>
             </v-col>
-            <v-col cols="2">
-              <h2 class="pt-4">
-                <span
-                  class="timeUnit"
-                  @click="toggleTime"
-                >{{ currentTimeUnit }}</span> 후에
-              </h2>
-            </v-col>
-            <v-col cols="2">
-              <h2 class="pt-4">
-                전구의 <span
-                  class="typeUnit"
-                  @click="toggleType"
-                >{{ currentTypeUnit }}</span>{{ currentTypeUnit === '전원' || currentTypeUnit === '색' ? '을' : '를' }}
-              </h2>
-            </v-col>
-            <v-col cols="2">
-              <h2
-                class="pt-4 "
-                @click="toggleCommand"
-              >
-                <span
-                  class="commandUnit"
-                >{{ currentCommandUnit }}</span>
-              </h2>
-            </v-col>
-            <v-col>
-              <v-icon
-                v-if="currentTypeUnit === '온도'"
-                class="pt-5 mr-5"
-                color="green"
-                @click="openDialog('ct')"
-              >
-                fas fa-thermometer-half
-              </v-icon>
-              <v-icon
-                v-if="currentTypeUnit === '채도'"
-                class="pt-5 mr-5"
-                color="green"
-                @click="openDialog('sat')"
-              >
-                fas fa-adjust
-              </v-icon>
-              <v-icon
-                v-if="currentTypeUnit === '밝기'"
-                class="pt-5 mr-5"
-                color="green"
-                @click="openDialog('bri')"
-              >
-                far fa-sun
-              </v-icon>
-              <v-icon
-                v-if="currentTypeUnit === '색'"
-                class="pt-5 mr-5"
-                color="green"
-                @click="openDialog('color')"
-              >
-                fas fa-palette
-              </v-icon>
-              <v-icon
-                v-if="valid"
-                class="pt-5"
-                color="green"
-                @click="addAlert"
-              >
-                fas fa-plus
-              </v-icon>
-              <v-icon
-                v-else
-                class="pt-5"
-                color="red"
-              >
-                fas fa-plus
-              </v-icon>
+
+            <v-col cols="6">
+              <v-row>
+                <h2 class="pt-4 mr-4">
+                  <span
+                    class="timeUnit"
+                    @click="toggleTime"
+                  >{{ currentTimeUnit }}</span> 후에
+                </h2>
+
+                <h2 class="pt-4 mr-2">
+                  {{ hueNumber }} 전구의 <span
+                    class="typeUnit"
+                    @click="toggleType"
+                  >{{ currentTypeUnit }}</span>{{ currentTypeUnit === '전원' || currentTypeUnit === '색' ? '을' : '를' }}
+                </h2>
+
+                <h2
+                  class="pt-4"
+                  @click="toggleCommand"
+                >
+                  <span
+                    class="commandUnit"
+                  >{{ currentCommandUnit }}</span>
+                </h2>
+
+                <v-icon
+                  v-if="currentTypeUnit === '온도'"
+                  class="mt-4 mr-3 ml-4"
+                  color="green"
+                  @click="openDialog('ct')"
+                >
+                  fas fa-thermometer-half
+                </v-icon>
+                <v-icon
+                  v-if="currentTypeUnit === '채도'"
+                  class="mt-4 mr-3 ml-4"
+                  color="green"
+                  @click="openDialog('sat')"
+                >
+                  fas fa-adjust
+                </v-icon>
+                <v-icon
+                  v-if="currentTypeUnit === '밝기'"
+                  class="mt-4 mr-3 ml-4"
+                  color="green"
+                  @click="openDialog('bri')"
+                >
+                  far fa-sun
+                </v-icon>
+                <v-icon
+                  v-if="currentTypeUnit === '색'"
+                  class="mt-4 mr-3 ml-4"
+                  color="green"
+                  @click="openDialog('color')"
+                >
+                  fas fa-palette
+                </v-icon>
+                <v-icon
+                  v-if="valid"
+                  class="mt-4 ml-5"
+                  color="green"
+                  @click="addAlert"
+                >
+                  fas fa-plus
+                </v-icon>
+                <v-icon
+                  v-else
+                  class="mt-4 ml-3"
+                  color="red"
+                >
+                  fas fa-plus
+                </v-icon>
+              </v-row>
             </v-col>
           </v-row>
 
           <timer-dialog
             v-if="optionDialog.ct"
             :huedata="huedata"
+            :numlist="numlist"
             type="ct"
             @closeOptionDialog="closeOptionDialog"
             @setOptionValue="setOptionValue"
@@ -157,6 +158,7 @@
           <timer-dialog
             v-if="optionDialog.bri"
             :huedata="huedata"
+            :numlist="numlist"
             type="bri"
             @closeOptionDialog="closeOptionDialog"
             @setOptionValue="setOptionValue"
@@ -164,6 +166,7 @@
           <timer-dialog
             v-if="optionDialog.sat"
             :huedata="huedata"
+            :numlist="numlist"
             type="sat"
             @closeOptionDialog="closeOptionDialog"
             @setOptionValue="setOptionValue"
@@ -171,6 +174,7 @@
           <timer-dialog
             v-if="optionDialog.color"
             :huedata="huedata"
+            :numlist="numlist"
             type="color"
             @closeOptionDialog="closeOptionDialog"
             @setOptionValue="setOptionValue"
@@ -307,6 +311,7 @@
     },
     props: {
       huedata: { type: Object, default: undefined },
+      numlist: { type: Array, default: null },
     },
     data () {
       return {
@@ -331,7 +336,10 @@
       }
     },
     computed: {
-
+      hueNumber () {
+        if (this.numlist) return ' 모든'
+        else return ` ${this.huedata.number}번`
+      },
     },
     watch: {
       currentTypeUnit: {
@@ -349,6 +357,7 @@
     },
     created () {
       this.dialog = true
+      console.log(this.numlist)
       this.renewAlertTime()
     },
     methods: {
@@ -409,23 +418,33 @@
           optionValue: this.currentTypeUnit === '색' ? this.currentOptionValue : Math.floor(this.currentOptionValue),
           valid: true,
         }
-        if (!this.alertList.find(element =>
-          element.value === newAlert.value && element.timeUnit === newAlert.timeUnit &&
-          element.typeUnit === newAlert.typeUnit && element.commandUnit === newAlert.commandUnit,
-        )) {
+
+        if (!this.hasEqualElement(newAlert)) {
           this.alertList = [...this.alertList, newAlert]
-          if (this.currentTypeUnit === '전원') {
+          if (this.currentTypeUnit === '전원' && !this.numlist) { // 1개 전구 전원 변경
             await axios.post(`/api/hue/${this.huedata.number}`, {
               on: newAlert.commandUnit === '켭니다',
               value: newAlert.value,
             })
-          } else {
+          } else if (this.currentTypeUnit === '전원' && this.numlist) { // 모든 전구 전원 변경
+            await Promise.all(this.numlist.map(num => axios.post(`/api/hue/${num}`, {
+              on: newAlert.commandUnit === '켭니다',
+              value: newAlert.value,
+            })))
+          } else if (this.currentTypeUnit !== '전원' && !this.numlist) { // 1개 전구 상태 변경
             await axios.post(`/api/hue/${this.huedata.number}`, {
               on: true,
               value: newAlert.value,
               type: this.getTypeUnit(newAlert.typeUnit),
               optionValue: newAlert.optionValue,
             })
+          } else { // 모든 전구 상태 변경
+            await Promise.all(this.numlist.map(num => axios.post(`/api/hue/${num}`, {
+              on: true,
+              value: newAlert.value,
+              type: this.getTypeUnit(newAlert.typeUnit),
+              optionValue: newAlert.optionValue,
+            })))
           }
         }
       },
@@ -436,6 +455,12 @@
           case '밝기': return 'bri'
           case '채도': return 'sat'
         }
+      },
+      hasEqualElement (newAlert) {
+        return this.alertList.find(element =>
+          element.value === newAlert.value && element.timeUnit === newAlert.timeUnit &&
+          element.typeUnit === newAlert.typeUnit && element.commandUnit === newAlert.commandUnit,
+        )
       },
       removeAlert (index) {
         this.alertList = [...this.alertList.slice(0, index), ...this.alertList.slice(index + 1)]

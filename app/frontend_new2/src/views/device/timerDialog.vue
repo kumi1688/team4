@@ -59,6 +59,7 @@
     props: {
       type: { type: String, default: undefined },
       huedata: { type: Object, default: undefined },
+      numlist: { type: Array, default: null },
     },
     data () {
       return {
@@ -77,10 +78,12 @@
     },
     created () {
       this.dialog = true
-      this.currentHSB = {
-        hue: this.huedata.hue,
-        sat: this.huedata.sat,
-        bri: this.huedata.bri,
+      if (!this.numlist) { // 1개의 전구 상태만 변경할 때
+        this.currentHSB = {
+          hue: this.huedata.hue,
+          sat: this.huedata.sat,
+          bri: this.huedata.bri,
+        }
       }
     },
     methods: {

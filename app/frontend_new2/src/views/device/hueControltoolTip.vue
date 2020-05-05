@@ -1,5 +1,5 @@
 <template>
-  <v-row>
+  <v-row justify="center">
     <v-tooltip
       v-model="tooltip"
       left
@@ -28,7 +28,7 @@
           thumb-label="always"
           :min="min"
           :max="max"
-          @mouseup="setValue('slider', type, step)"
+          @mousedown="setValue('slider', type, step)"
         />
         <!-- 153 (6500K) to 500 (2000K). -->
         <v-icon
@@ -87,7 +87,7 @@
     },
     watch: {
       updateValue () {
-        console.log('업데이트', this.updateValue)
+        // console.log('업데이트', this.updateValue)
         this.sliderValue = this.updateValue
       },
     },

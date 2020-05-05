@@ -14,7 +14,9 @@ export default new Vuex.Store({
     assignInfo: {},
     alerts: {},
     links: {},
+    isNewLink: false,
     messages: {},
+    linkData: {},
   },
   mutations: {
     SET_BAR_IMAGE (state, payload) {
@@ -33,11 +35,34 @@ export default new Vuex.Store({
       const { type, value } = payload
       state.alerts[type] = [...value]
     },
-    SET_LINKS (state, payload) {
-      state.links = payload
-    },
     SET_ASSIGN_INFO (state, payload) {
       state.assignInfo = payload
+    },
+    SET_LINK_DATA (state, payload) {
+        state.linkData = {
+          deviceInfo: { ...payload.deviceInfo },
+          valueInfo: { ...payload.valueInfo },
+        }
+    },
+    SET_LINK_LIST (state, payload) {
+      state.links[payload.type] = payload.value
+      console.log(payload)
+    },
+    ADD_LINK (state, sensor) {
+      const newLink = {
+        deviceInfo: { ...state.linkData.deviceInfo },
+        valueInfo: { ...state.linkData.valueInfo },
+      }
+      state.linkData = {}
+      if (!state.links[sensor]) state.links[sensor] = []
+      // if (!checkLinks(state, sensor, newLink)) return
+       state.links[sensor] = [...state.links[sensor], newLink]
+    },
+    INIT_LINK_LIST (state) {
+      state.links = {}
+    },
+    CHECK_NEW_LINK (state, payload) {
+      state.isNewLink = payload
     },
     SET_MESSAGES (state, payload) {
       const { type, value } = payload
@@ -63,3 +88,12 @@ export default new Vuex.Store({
   },
   actions: {},
 })
+
+// function checkLinks (state, sensor, newLink) {
+//   const result = state.links[sensor].find(link =>
+//     link.deviceInfo.number === newLink.deviceInfo.number &&
+//     link.valueInfo.type === newLink.valueInfo.type &&
+//     link.valueInfo.value === newLink.valueInfo.value,
+//   )
+//   return result
+// }

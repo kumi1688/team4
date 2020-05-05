@@ -51,7 +51,7 @@
 
     <v-dialog
       v-model="dialog"
-      max-width="1000"
+      max-width="1200"
     >
       <v-card>
         <v-card-title class="display-3">
@@ -97,19 +97,49 @@
               </v-list-item-group>
             </v-list>
           </v-card>
+          <v-card
+            elevation="15"
+            class="mx-auto"
+            max-width="700"
+          >
+            <v-list
+              dense
+            >
+              <v-list-item-group color="primary">
+                <v-list-item
+                  v-for="(link, index) in linkList"
+                  :key="index"
+                >
+                  <v-list-item-icon>
+                    <v-icon color="green">
+                      fas fa-exclamation
+                    </v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                    <h2 class="mx-auto">
+                      {{ link[0][0] }} {{ link[0][1] }} {{ link[0][2] }} {{ link[0][3] }} {{ link[0][4] }} {{ link[0][5] }}
+                    </h2>
+                  </v-list-item-content>
+                  <v-list-item-icon @click="removeLink(index)">
+                    <v-icon color="red">
+                      fas fa-minus
+                    </v-icon>
+                  </v-list-item-icon>
+                </v-list-item>
+              </v-list-item-group>
+            </v-list>
+          </v-card>
         </v-row>
         <template>
           <v-form>
             <v-container>
               <v-row
-                align="start"
-                justify="start"
+                justify="center"
+                align="center"
               >
-                <v-col cols="3">
-                  <h2 class="ml-3 mt-4">
-                    <span id="name">{{ nameInDialog[0] }}</span>{{ nameInDialog[1] }}
-                  </h2>
-                </v-col>
+                <h2 class="ml-5">
+                  <span id="name">{{ nameInDialog[0] }}</span>{{ nameInDialog[1] }}
+                </h2>
 
                 <v-col cols="2">
                   <v-text-field
@@ -132,54 +162,51 @@
                   </v-text-field>
                 </v-col>
 
-                <v-col cols="1.5">
+                <v-col cols="2">
                   <v-select
                     v-model="alertValue[1]"
                     :items="items"
                   />
                 </v-col>
 
-                <v-col cols="4">
-                  <h2 class="mt-4">
-                    일 때 <span
-                      v-if="!alertType"
-                      id="alert"
-                      @click="toggleAlertType"
-                    >알림</span> <span
-                      v-if="alertType"
-                      id="link"
-                      @click="toggleAlertType"
-                    >연동</span> 설정합니다
-                  </h2>
-                </v-col>
-                <v-col>
-                  <v-icon
-                    v-if="!alertValue[1] "
-                    size="30"
-                    class="mt-4"
-                    color="red"
-                  >
-                    fas fa-plus
-                  </v-icon>
-                  <v-icon
-                    v-else-if="alertType"
-                    size="30"
-                    class="mt-4"
-                    color="blue"
-                    @click="addLink"
-                  >
-                    fas fa-link
-                  </v-icon>
-                  <v-icon
-                    v-else
-                    size="30"
-                    class="mt-4"
-                    color="green"
-                    @click="addAlarm"
-                  >
-                    fas fa-plus
-                  </v-icon>
-                </v-col>
+                <h2 class="mr-0">
+                  일 때 <span
+                    v-if="!alertType"
+                    id="alert"
+                    @click="toggleAlertType"
+                  >알림</span> <span
+                    v-if="alertType"
+                    id="link"
+                    @click="toggleAlertType"
+                  >연동</span> 설정합니다
+                </h2>
+
+                <v-icon
+                  v-if="!alertValue[1] "
+                  size="30"
+                  class="ml-4"
+                  color="red"
+                >
+                  fas fa-plus
+                </v-icon>
+                <v-icon
+                  v-else-if="alertType"
+                  size="30"
+                  class="ml-4"
+                  color="blue"
+                  @click="openLinkDialog"
+                >
+                  fas fa-link
+                </v-icon>
+                <v-icon
+                  v-else
+                  size="30"
+                  class="ml-4"
+                  color="green"
+                  @click="addAlarm"
+                >
+                  fas fa-plus
+                </v-icon>
               </v-row>
             </v-container>
           </v-form>
@@ -210,7 +237,6 @@
         bottom
         :color="color"
         :timeout="Number(5000)"
-        @input="toggleAlert(index)"
       >
         <v-icon class="pl-0 ml-0">
           fas fa-exclamation-circle
@@ -222,6 +248,7 @@
     </v-container>
     <chart-link-container
       v-if="linkDialog"
+      :sensor="name"
       @linkDialogClose="linkDialogClose"
     />
   </v-container>
@@ -254,9 +281,14 @@
         alertType: false,
         linkList: [],
         linkDialog: false,
+        linkData: [],
+        linkDataCondition: [],
       }
     },
     computed: {
+      isNewLink () {
+        return this.$store.state.isNewLink
+      },
       nameInDialog () {
         switch (this.name) {
           case 'temperature': return ['온도', '가']
@@ -270,6 +302,15 @@
       },
     },
     watch: {
+      isNewLink () {
+        if (this.isNewLink) {
+          console.log('새 링크 확보')
+          // console.log(this.$store.state.links)
+          this.linkData = this.$store.state.links[this.name]
+          this.$store.commit('CHECK_NEW_LINK', false)
+          // console.log(this.$store.state.isNewLink)
+        }
+      },
       rawData: {
         deep: true,
         handler () {
@@ -293,6 +334,8 @@
     beforeDestroy () {
       this.$store.commit('SET_ALERTS', { type: this.name, value: this.alertList })
       this.$store.commit('SET_MESSAGES', { type: this.name, value: this.messages })
+      console.log(this.linkList)
+      this.$store.commit('SET_LINK_LIST', { type: this.name, value: this.linkList })
     },
     created () {
       this.rawData = this.data.series[0]
@@ -309,6 +352,14 @@
       } else {
         this.messages = this.$store.state.messages[this.name]
       }
+      if (this.$store.state.links[this.name] === undefined) {
+        this.linkList = []
+      } else {
+        this.linkList = this.$store.state.links[this.name]
+      }
+      console.log(this.$store.state.links)
+
+      // console.log(this.linkList)
 
       this.messages.map(msg => {
         this.totalMessage += msg
@@ -318,10 +369,28 @@
       this.rawData = this.data.series[0]
     },
     methods: {
+      linkInfo (link) {
+        console.log(this.linkList)
+        const name = link.deviceInfo.device === 'hue' ? '전구' : '부저'
+        const number = link.deviceInfo.number
+        let type = ''; let prefix = ''
+        switch (link.valueInfo.type) {
+          case 'color': type = '색'; prefix = '을'; break
+          case 'ct': type = '온도'; prefix = '를'; break
+          case 'bri': type = '밝기'; prefix = '를'; break
+          case 'sat': type = '채도'; prefix = '를'; break
+        }
+        const [conditionName, conditionPrefix] = this.getName()
+
+        // 10번 전구의 색을 변경합니다
+        const result = [`${conditionName}${conditionPrefix}`, `${this.alertValue[0]}`, `${this.alertValue[1]} 일 때`, `${number}번 ${name}`, `${type}${prefix}`, '변경합니다']
+        console.log(result)
+        return result
+      },
       toggleAlertType () {
         this.alertType = !this.alertType
       },
-      addLink () {
+      openLinkDialog () {
         this.linkDialog = true
       },
       addAlarm () {
@@ -344,17 +413,32 @@
         this.showAlert = [...this.showAlert.slice(0, index), ...this.alertList.slice(index + 1)]
         this.messages = [...this.messages.slice(0, index), ...this.messages.slice(index + 1)]
       },
+      removeLink (index) {
+        this.linkList = [...this.linkList.slice(0, index), ...this.linkList.slice(index + 1)]
+      },
       removeAllAlert () {
         this.totalMessage = 0
         this.alertList = []
         this.messages = []
         this.showAlert = []
       },
-      toggleAlert (index) {
-        // console.log(this.alertList, this.showAlert[index])
-      },
+
       linkDialogClose () {
+        this.linkList = [...this.linkList, this.linkData.map(link => this.linkInfo(link))]
+        this.alertValue = [(this.options.high + this.options.low) / 2, null]
+        this.$store.commit('INIT_LINK_LIST')
         this.linkDialog = false
+      },
+      getName () {
+        switch (this.name) {
+          case 'temperature': return ['온도', '가']
+          case 'gas': return ['가스 농도', '가']
+          case 'co' : return ['일산화탄소 농도', '가']
+          case 'light': return ['조도', '가']
+          case 'flame': return ['불꽃', '이']
+          case 'dust': return ['미세먼지', '가']
+          default: return null
+        }
       },
     },
   }

@@ -9,7 +9,10 @@
         height="600"
       >
         <v-col>
-          <v-row>
+          <v-row
+            align="center"
+            justify="center"
+          >
             <h2 class="display-2">
               색 설정
             </h2>
@@ -68,7 +71,10 @@
             </v-dialog>
           </v-row>
 
-          <v-row class="mt-5">
+          <v-row
+            class="mt-5 ml-5 mr-5"
+            justify="center"
+          >
             <hue-control-tool-tip
               type="ct"
               :ct="currentTemperature"
@@ -76,7 +82,10 @@
             />
           </v-row>
 
-          <v-row class="mt-5">
+          <v-row
+            class="mt-5 ml-5 mr-5"
+            justify="center"
+          >
             <hue-control-tool-tip
 
               type="sat"
@@ -85,7 +94,10 @@
             />
           </v-row>
 
-          <v-row class="mt-5">
+          <v-row
+            class="mt-5 ml-5 mr-5"
+            justify="center"
+          >
             <hue-control-tool-tip
               type="bri"
               :bri="currentBrightness"
@@ -93,7 +105,10 @@
             />
           </v-row>
 
-          <v-row justify="center">
+          <v-row
+
+            justify="center"
+          >
             <v-card-actions>
               <v-spacer />
               <v-icon
@@ -178,19 +193,16 @@
             hue: this.currentHSB.hue,
             sat: this.currentHSB.sat,
             bri: this.currentHSB.bri,
+            numlist: this.numlist,
           }
-
-          await Promise.all(this.numlist.map(hue => this.requestHueChange(hue, data)))
+          await axios.put('/api/hue/changeAll', data)
         } else {
-          const data = { on: this.currentPower }
-          data[type] = Math.floor(value)
-          await Promise.all(this.numlist.map(hue => this.requestHueChange(hue, data)))
+          const data = { on: this.currentPower, numlist: this.numlist }
+          if (type) data[type] = Math.floor(value)
+          await axios.put('/api/hue/changeAll', data)
         }
 
         console.log('요청 일괄 반영')
-      },
-      requestHueChange (hue, data) {
-        return axios.put(`/api/hue/${hue}`, data)
       },
       switchPower () {
         this.currentPower = !this.currentPower

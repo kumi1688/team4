@@ -3,19 +3,22 @@
     <timer-container
       v-if="hueTimerDialog"
       :huedata="selectedData"
+      :numlist="numlist"
       @closeDialog="closeDialog"
     />
     <hue-control
       v-if="dialog"
       :open="dialog"
       :huedata="selectedData"
+      :sensor="sensor"
+      @addLink="addLink"
       @closeDialog="closeDialog"
     />
-
     <hue-control-all
       v-if="dialogAll"
       :open="dialogAll"
       :numlist="numlist"
+      :sensor="sensor"
       @closeDialog="closeDialog"
     />
     <v-card
@@ -35,7 +38,7 @@
         <v-btn icon>
           <v-icon
             class="mr-2"
-            @click="openHueDialog(-1)"
+            @click="openHueTimerDialog(-1)"
           >
             far fa-clock
           </v-icon>
@@ -50,10 +53,16 @@
 
       <v-list>
         <v-list-item
-          v-for="hue in huelist"
-          :key="hue"
+          v-for="(hue,index) in huelist"
+          :key="index"
         >
           <v-list-item-avatar>
+            <v-icon
+              v-if="isLink[index]"
+              color="blue"
+            >
+              fas fa-link
+            </v-icon>
             <v-badge
               dot
               :color="getHuePowerIconColor(hue)"
@@ -72,7 +81,10 @@
             </v-list-item-title>
           </v-list-item-content>
 
-          <v-icon @click="openHueTimerDialog(hue)">
+          <v-icon
+            :color="sensor? 'red' : 'none'"
+            @click="openHueTimerDialog(hue)"
+          >
             far fa-clock
           </v-icon>
 
@@ -123,7 +135,6 @@
       'hue-control': hueControl,
       'hue-control-all': hueControlAll,
       'timer-container': timerContainer,
-
     },
     props: {
       huelist: {
@@ -142,8 +153,13 @@
         type: Array,
         default: undefined,
       },
+      sensor: {
+        type: String,
+        default: undefined,
+      },
     },
     data: () => ({
+      isLink: [],
       hueIconColor: 'green',
       dialog: false,
       hueTimerDialog: false,
@@ -151,15 +167,13 @@
       dialogAll: false,
       numlist: null,
     }),
-    watch: {
-      hueTimerDialog () {
-        console.log(this.hueTimerDialog)
-      },
-    },
     created () {
-
+      this.huelist.map((hue, index) => {
+        this.isLink[index] = false
+      })
     },
     methods: {
+
       getHuePowerIconColor (hue) {
         const result = this.huedata.find(hd => hd.number === hue)
         if (result && result.on) return 'green'
@@ -173,8 +187,13 @@
         return `rgba(${currentColor[0]}, ${currentColor[1]}, ${currentColor[2]}, 1)`
       },
       openHueTimerDialog (hue) {
+        if (this.sensorlink) return
         if (hue !== -1) {
           this.selectedData = this.huedata.find(hd => hd.number === hue)
+          this.numlist = null
+          this.hueTimerDialog = true
+        } else {
+          this.numlist = this.huedata.map(hd => hd.number)
           this.hueTimerDialog = true
         }
       },
@@ -194,6 +213,11 @@
           this.selectedData = this.huedata.find(hd => hd.number === hue)
           this.dialog = true
         }
+      },
+      addLink (number) {
+        const index = this.huedata.findIndex(hue => hue.number === number)
+        this.isLink[index] = true
+        console.log(this.$store.state.links)
       },
     },
   }

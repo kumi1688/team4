@@ -19,7 +19,7 @@
             </v-card-title>
 
             <template>
-              <v-row justify="space-around">
+              <v-row justify="center">
                 <v-list
                   color="#E3F2FD"
                   width="500"
@@ -98,7 +98,10 @@
             height="600"
           >
             <v-col>
-              <v-row>
+              <v-row
+                align="center"
+                justify="center"
+              >
                 <h2 class="display-2">
                   색 설정
                 </h2>
@@ -117,7 +120,7 @@
                   v-model="modal2"
                   :return-value.sync="time"
                   persistent
-                  width="290px"
+                  width="1200"
                 >
                   <template
                     v-slot:activator="{ on }"
@@ -139,19 +142,13 @@
                       hide-inputs
                       hide-mode-switch
                       swatches-max-height="300px"
-                      width="450"
+                      width="1200"
                       @input="setColor"
                     />
                     <v-card-actions>
                       <v-btn
                         color="green"
                         @click="modal2 = false"
-                      >
-                        닫기
-                      </v-btn>
-                      <v-btn
-                        color="green"
-                        @click="$refs.dialog.save(time)"
                       >
                         설정
                       </v-btn>
@@ -160,7 +157,10 @@
                 </v-dialog>
               </v-row>
 
-              <v-row class="mt-5">
+              <v-row
+                class="mt-5 ml-5 mr-5"
+                justify="center"
+              >
                 <hue-control-tool-tip
                   type="ct"
                   :ct="currentTemperature"
@@ -168,7 +168,7 @@
                 />
               </v-row>
 
-              <v-row class="mt-5">
+              <v-row class="mt-5 ml-5 mr-5">
                 <hue-control-tool-tip
                   v-if="!colorLoading"
                   type="sat"
@@ -177,7 +177,7 @@
                 />
               </v-row>
 
-              <v-row class="mt-5">
+              <v-row class="mt-5 ml-5 mr-5">
                 <hue-control-tool-tip
                   v-if="!colorLoading"
                   type="bri"
@@ -198,6 +198,12 @@
                     fas fa-power-off
                   </v-icon>
 
+                  <v-btn
+                    color="green darken-1"
+                    @click="addLink"
+                  >
+                    연동 설정
+                  </v-btn>
                   <v-btn
                     color="green darken-1"
                     @click="closeDialog"
@@ -232,6 +238,10 @@
         type: Object,
         default: undefined,
       },
+      sensor: {
+        type: String,
+        default: null,
+      },
     },
     data () {
       return {
@@ -254,7 +264,6 @@
           ['#00FFFF', '#00AAAA', '#005555'],
           ['#0000FF', '#0000AA', '#000055'],
         ],
-
       }
     },
     computed: {
@@ -267,25 +276,6 @@
         else if (this.huedata.bri > 50) return '중간'
         else return '어두움'
       },
-
-    },
-    watch: {
-      currentRGB () {
-
-      },
-      // currentTemperature () {
-      //   const value = (this.currentTemperature - 2000) / 13 + 153
-      //   this.requestChange('ct', value)
-      // },
-      // currentSaturation () {
-      //   const value = this.currentSaturation * 2.5
-      //   this.requestChange('sat', value)
-      // },
-      // currentBrightness () {
-      //   const value = this.currentBrightness * 2.5
-      //   this.requestChange('bri', value)
-      // },
-
     },
     created () {
       this.loading = true
@@ -327,15 +317,20 @@
       },
       setColor () {
         this.colorLoading = true
-        console.log(this.currentRGB)
         this.currentHSB = rgbToHsvString(this.currentRGB)
         this.currentSaturation = this.currentHSB.sat / (2.5)
         this.currentBrightness = this.currentHSB.bri / (2.5)
-        this.reqeustHueChange()
+        if (this.sensor) {
+          const data = {
+            deviceInfo: { device: 'hue', number: this.huedata.number },
+            valueInfo: { type: 'color', value: this.currentHSB },
+          }
+          this.$store.commit('SET_LINK_DATA', data)
+        } else this.reqeustColorChange()
         this.colorLoading = false
       },
-      async reqeustHueChange () {
-        await axios.put(`/api/hue/${this.huedata.number}`, {
+      async reqeustColorChange () {
+        await axios.put(`/api/hue/change/${this.huedata.number}`, {
           on: this.currentPower,
           hue: this.currentHSB.hue,
           sat: this.currentHSB.sat,
@@ -346,15 +341,30 @@
       async requestChange (type, value) {
         const data = { on: this.currentPower }
         data[type] = Math.floor(value)
-        await axios.put(`/api/hue/${this.huedata.number}`, data)
-
-        console.log('요청 반영됨2')
+        if (this.sensor) {
+          const data = {
+            deviceInfo: { device: 'hue', number: this.huedata.number },
+            valueInfo: { type: type, value: Math.floor(value) },
+          }
+          this.$store.commit('SET_LINK_DATA', data)
+          console.log(this.$store.state.linkData)
+          console.log(this.$store.state.links)
+        } else {
+          await axios.put(`/api/hue/change/${this.huedata.number}`, data)
+          console.log('요청 반영됨2')
+        }
       },
       switchPower () {
         this.currentPower = !this.currentPower
-        axios.put(`/api/hue/${this.huedata.number}`, {
+        axios.put(`/api/hue/change/${this.huedata.number}`, {
           on: this.currentPower,
         })
+      },
+      addLink () {
+        this.$store.commit('ADD_LINK', this.sensor)
+        this.$store.commit('CHECK_NEW_LINK', true)
+        this.$emit('addLink', this.huedata.number)
+        this.closeDialog()
       },
     },
 
