@@ -29,7 +29,7 @@
               ref="dialog"
               v-model="modal2"
               persistent
-              width="290px"
+              width="1200"
             >
               <template
                 v-slot:activator="{ on }"
@@ -51,7 +51,7 @@
                   hide-inputs
                   hide-mode-switch
                   swatches-max-height="300px"
-                  width="450"
+                  width="1200"
                   @input="setColor"
                 />
                 <v-card-actions>

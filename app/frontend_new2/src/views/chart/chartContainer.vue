@@ -266,6 +266,7 @@
       options: { type: Object, default: undefined },
       name: { type: String, default: undefined },
       color: { type: String, default: undefined },
+      socket: { type: Object, default: undefined },
     },
     data () {
       return {
@@ -304,11 +305,8 @@
     watch: {
       isNewLink () {
         if (this.isNewLink) {
-          console.log('새 링크 확보')
-          // console.log(this.$store.state.links)
           this.linkData = this.$store.state.links[this.name]
           this.$store.commit('CHECK_NEW_LINK', false)
-          // console.log(this.$store.state.isNewLink)
         }
       },
       rawData: {
@@ -334,7 +332,6 @@
     beforeDestroy () {
       this.$store.commit('SET_ALERTS', { type: this.name, value: this.alertList })
       this.$store.commit('SET_MESSAGES', { type: this.name, value: this.messages })
-      console.log(this.linkList)
       this.$store.commit('SET_LINK_LIST', { type: this.name, value: this.linkList })
     },
     created () {
@@ -357,9 +354,6 @@
       } else {
         this.linkList = this.$store.state.links[this.name]
       }
-      console.log(this.$store.state.links)
-
-      // console.log(this.linkList)
 
       this.messages.map(msg => {
         this.totalMessage += msg
@@ -422,9 +416,16 @@
         this.messages = []
         this.showAlert = []
       },
-
       linkDialogClose () {
         this.linkList = [...this.linkList, this.linkData.map(link => this.linkInfo(link))]
+        this.addLinkWS({
+          data: this.linkData,
+          condition: {
+            sensor: this.name,
+            value: this.alertValue[0],
+            criteria: this.alertValue[1],
+          },
+        })
         this.alertValue = [(this.options.high + this.options.low) / 2, null]
         this.$store.commit('INIT_LINK_LIST')
         this.linkDialog = false
@@ -440,6 +441,10 @@
           default: return null
         }
       },
+      addLinkWS (data) {
+        this.socket.emit('addAlert', JSON.stringify(data))
+      },
+
     },
   }
 </script>

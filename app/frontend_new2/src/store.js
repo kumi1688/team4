@@ -46,7 +46,6 @@ export default new Vuex.Store({
     },
     SET_LINK_LIST (state, payload) {
       state.links[payload.type] = payload.value
-      console.log(payload)
     },
     ADD_LINK (state, sensor) {
       const newLink = {

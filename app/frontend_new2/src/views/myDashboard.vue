@@ -19,6 +19,7 @@
           :color="randomColor(index)"
           hover-reveal
           type="Line"
+          :socket="filterWS(type)"
         />
       </v-col>
     </v-row>
@@ -44,6 +45,7 @@
     },
     data () {
       return {
+        socketList,
         baseChartOption: {
           data: {
             labels: ['0초', '2초', '4초', '6초', '8초', '10초', '12초', '14초'],
@@ -94,6 +96,7 @@
       this.setBaseChartData()
       this.connectWebSocket()
       this.updateDataWS()
+
       this.loading = false
     },
     methods: {
@@ -127,6 +130,10 @@
         }
         return this.baseChartOption.options
       },
+      filterWS (type) {
+        const result = this.socketList.filter(socket => socket.nsp === '/' + type)
+        return result[0]
+      },
       connectWebSocket () {
         socketList.map(socket => {
           socket.on('connection', () => {
@@ -139,6 +146,7 @@
         this.chartData[type].series[0] = [...this.chartData[type].series[0].slice(1), newData[type]]
         this.loading = false
       },
+
       updateDataWS () {
         socketList.map(socket => {
           socket.on('update', (data) => {
