@@ -36,7 +36,17 @@
   const socketFlame = io(`${process.env.VUE_APP_BACKEND_URL}/flame`)
   const socketGas = io(`${process.env.VUE_APP_BACKEND_URL}/gas`)
   const socketCo = io(`${process.env.VUE_APP_BACKEND_URL}/co`)
-  const socketList = [socketTemp, socketDust, socketLight, socketFlame, socketGas, socketCo]
+  const socketPir = io(`${process.env.VUE_APP_BACKEND_URL}/pir`)
+
+  const socketList = [
+    socketTemp,
+    socketDust,
+    socketLight,
+    socketFlame,
+    socketGas,
+    socketCo,
+    socketPir,
+  ]
 
   export default {
     name: 'MyDashboardDashboard',
@@ -59,7 +69,7 @@
 
         chartData: {},
         // sensorList: null,
-        sensorList: ['dust', 'co', 'light', 'temperature', 'gas', 'flame'],
+        sensorList: ['dust', 'co', 'light', 'temperature', 'gas', 'flame', 'pir'],
         actuatorList: ['buzzer', 'hue'],
         loading: false,
         baseData: {
@@ -92,6 +102,8 @@
       this.loading = true
       this.getSensorList()
       this.getProperty()
+      console.log(this.sensorList)
+      console.log(this.properties)
 
       this.setBaseChartData()
       this.connectWebSocket()
@@ -108,9 +120,11 @@
         this.sensorList = result.data
       },
       async getProperty () {
-        const result = await Promise.all(this.sensorList.map(sensor => {
-          return axios.get(`/api/${sensor}/property`)
-        }))
+        const result = await Promise.all(
+          this.sensorList.map(sensor => {
+            return axios.get(`/api/${sensor}/property`)
+          }),
+        )
         result.map((property, index) => {
           this.properties[this.sensorList[index]] = property.data
         })
@@ -119,19 +133,28 @@
         this.sensorList.map(sensor => {
           // shallow copy 때문에 series[0]은 분해해서 복사
 
-          this.chartData[sensor] = { ...this.baseData, series: [...this.baseData.series] }
+          this.chartData[sensor] = {
+            ...this.baseData,
+            series: [...this.baseData.series],
+          }
         })
       },
       getChartOption (sensor) {
         if (this.properties[sensor] !== undefined) {
-          const options = { ...this.baseChartOption.options, low: this.properties[sensor].min, high: this.properties[sensor].max }
+          const options = {
+            ...this.baseChartOption.options,
+            low: this.properties[sensor].min,
+            high: this.properties[sensor].max,
+          }
 
           return options
         }
         return this.baseChartOption.options
       },
       filterWS (type) {
-        const result = this.socketList.filter(socket => socket.nsp === '/' + type)
+        const result = this.socketList.filter(
+          socket => socket.nsp === '/' + type,
+        )
         return result[0]
       },
       connectWebSocket () {
@@ -143,15 +166,24 @@
       },
       updateChartData (newData, type) {
         this.loading = true
-        this.chartData[type].series[0] = [...this.chartData[type].series[0].slice(1), newData[type]]
+        this.chartData[type].series[0] = [
+          ...this.chartData[type].series[0].slice(1),
+          newData[type],
+        ]
         this.loading = false
       },
 
       updateDataWS () {
         socketList.map(socket => {
-          socket.on('update', (data) => {
+          socket.on('update', data => {
             // console.log(`[sys] ${socket.nsp} 업데이트 됨!`)
-            this.updateChartData(JSON.parse(data), socket.nsp.split('').slice(1).join(''))
+            this.updateChartData(
+              JSON.parse(data),
+              socket.nsp
+                .split('')
+                .slice(1)
+                .join(''),
+            )
           })
         })
       },

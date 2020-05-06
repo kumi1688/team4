@@ -53,7 +53,7 @@
 
       <v-list>
         <v-list-item
-          v-for="(hue,index) in huelist"
+          v-for="(hue, index) in huelist"
           :key="index"
         >
           <v-list-item-avatar>
@@ -67,9 +67,7 @@
               dot
               :color="getHuePowerIconColor(hue)"
             >
-              <v-icon
-                :color="getHueStatusIconColor(hue)"
-              >
+              <v-icon :color="getHueStatusIconColor(hue)">
                 far fa-lightbulb
               </v-icon>
             </v-badge>
@@ -82,7 +80,7 @@
           </v-list-item-content>
 
           <v-icon
-            :color="sensor? 'red' : 'none'"
+            :color="sensor ? 'red' : 'none'"
             @click="openHueTimerDialog(hue)"
           >
             far fa-clock
@@ -101,9 +99,7 @@
           :key="buzzer"
         >
           <v-list-item-avatar>
-            <v-icon
-              color="green"
-            >
+            <v-icon color="green">
               fas fa-bullhorn
             </v-icon>
           </v-list-item-avatar>
@@ -114,7 +110,17 @@
             </v-list-item-title>
           </v-list-item-content>
 
-          <v-icon @click="openBuzzerDialog(buzzer)">
+          <v-icon
+            v-if="buzzerCheck"
+            color="blue"
+            @click="setBuzzerLink(buzzer)"
+          >
+            fas fa-link
+          </v-icon>
+          <v-icon
+            v-else
+            @click="setBuzzerLink(buzzer)"
+          >
             fas fa-cog
           </v-icon>
         </v-list-item>
@@ -166,14 +172,25 @@
       selectedData: null,
       dialogAll: false,
       numlist: null,
+      buzzerCheck: false,
     }),
     created () {
       this.huelist.map((hue, index) => {
         this.isLink[index] = false
       })
     },
+    beforeDestroy () {
+      if (this.sensor && this.buzzerCheck) {
+        const data = {
+          deviceInfo: { device: 'buzzer', number: 1 },
+          valueInfo: { type: 'buzzer', value: 'on' },
+        }
+        this.$store.commit('SET_LINK_DATA', data)
+        this.$store.commit('ADD_LINK', this.sensor)
+        this.$store.commit('CHECK_NEW_LINK', true)
+      }
+    },
     methods: {
-
       getHuePowerIconColor (hue) {
         const result = this.huedata.find(hd => hd.number === hue)
         if (result && result.on) return 'green'
@@ -202,8 +219,10 @@
         this.dialogAll = false
         this.hueTimerDialog = false
       },
-      openBuzzerDialog (buzzer) {
-
+      setBuzzerLink (buzzer) {
+        if (this.sensor && !this.buzzerCheck) {
+          this.buzzerCheck = true
+        } else this.buzzerCheck = false
       },
       openHueDialog (hue) {
         if (hue === -1) {
@@ -217,7 +236,6 @@
       addLink (number) {
         const index = this.huedata.findIndex(hue => hue.number === number)
         this.isLink[index] = true
-        console.log(this.$store.state.links)
       },
     },
   }

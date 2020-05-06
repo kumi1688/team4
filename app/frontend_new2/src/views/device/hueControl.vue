@@ -27,13 +27,8 @@
                   rounded
                   expand
                 >
-                  <v-list-item-group
-
-                    color="primary"
-                  >
-                    <v-list-item
-                      min-height="100"
-                    >
+                  <v-list-item-group color="primary">
+                    <v-list-item min-height="100">
                       <v-list-item-icon>
                         <v-icon
                           size="lg"
@@ -44,18 +39,16 @@
                       </v-list-item-icon>
                       <v-list-item-content>
                         <v-list-item-title class="display-2">
-                          전원 {{ huedata.on ? '켜짐' : '꺼짐' }}
+                          전원 {{ huedata.on ? "켜짐" : "꺼짐" }}
                         </v-list-item-title>
                       </v-list-item-content>
                     </v-list-item>
 
-                    <v-list-item
-                      min-height="100"
-                    >
+                    <v-list-item min-height="100">
                       <v-list-item-icon>
                         <v-icon
                           size="xl"
-                          :color="temperature === '낮음'? 'red': 'green'"
+                          :color="temperature === '낮음' ? 'red' : 'green'"
                         >
                           fas fa-thermometer-three-quarters
                         </v-icon>
@@ -67,9 +60,7 @@
                       </v-list-item-content>
                     </v-list-item>
 
-                    <v-list-item
-                      min-height="100"
-                    >
+                    <v-list-item min-height="100">
                       <v-list-item-icon>
                         <v-icon
                           size="lg"
@@ -94,9 +85,7 @@
           </v-card>
         </v-col>
         <v-col>
-          <v-card
-            height="600"
-          >
+          <v-card height="600">
             <v-col>
               <v-row
                 align="center"
@@ -122,9 +111,7 @@
                   persistent
                   width="1200"
                 >
-                  <template
-                    v-slot:activator="{ on }"
-                  >
+                  <template v-slot:activator="{ on }">
                     <v-btn
                       class="ml-10"
                       color="indigo"
@@ -199,6 +186,7 @@
                   </v-icon>
 
                   <v-btn
+                    v-if="sensor"
                     color="green darken-1"
                     @click="addLink"
                   >
@@ -268,7 +256,9 @@
     },
     computed: {
       temperature () {
-        if (this.huedata.ct > 350) { return '차가움' } else if (this.huedata.ct > 200) return '중간'
+        if (this.huedata.ct > 350) {
+          return '차가움'
+        } else if (this.huedata.ct > 200) return '중간'
         else return '따뜻함'
       },
       bright () {
@@ -291,13 +281,17 @@
       this.currentPower = this.huedata.on
 
       this.currentTemperature = (this.huedata.ct - 153) * 13 + 2000
-      this.currentSaturation = this.huedata.sat / (2.5)
-      this.currentBrightness = this.huedata.bri / (2.5)
+      this.currentSaturation = this.huedata.sat / 2.5
+      this.currentBrightness = this.huedata.bri / 2.5
       this.loading = false
     },
     methods: {
       initColor () {
-        const result = hsbToRgb(this.huedata.hue, this.huedata.sat, this.huedata.bri)
+        const result = hsbToRgb(
+          this.huedata.hue,
+          this.huedata.sat,
+          this.huedata.bri,
+        )
         this.currentRGB = {
           ...this.currentRGB,
           rgba: {
@@ -318,8 +312,8 @@
       setColor () {
         this.colorLoading = true
         this.currentHSB = rgbToHsvString(this.currentRGB)
-        this.currentSaturation = this.currentHSB.sat / (2.5)
-        this.currentBrightness = this.currentHSB.bri / (2.5)
+        this.currentSaturation = this.currentHSB.sat / 2.5
+        this.currentBrightness = this.currentHSB.bri / 2.5
         if (this.sensor) {
           const data = {
             deviceInfo: { device: 'hue', number: this.huedata.number },
@@ -347,8 +341,6 @@
             valueInfo: { type: type, value: Math.floor(value) },
           }
           this.$store.commit('SET_LINK_DATA', data)
-          console.log(this.$store.state.linkData)
-          console.log(this.$store.state.links)
         } else {
           await axios.put(`/api/hue/change/${this.huedata.number}`, data)
           console.log('요청 반영됨2')
@@ -356,9 +348,11 @@
       },
       switchPower () {
         this.currentPower = !this.currentPower
-        axios.put(`/api/hue/change/${this.huedata.number}`, {
-          on: this.currentPower,
-        })
+        if (!this.sensor) {
+          axios.put(`/api/hue/change/${this.huedata.number}`, {
+            on: this.currentPower,
+          })
+        }
       },
       addLink () {
         this.$store.commit('ADD_LINK', this.sensor)
@@ -367,6 +361,5 @@
         this.closeDialog()
       },
     },
-
   }
 </script>

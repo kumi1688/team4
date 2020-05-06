@@ -5,9 +5,7 @@
       persistent
       max-width="500"
     >
-      <v-card
-        height="600"
-      >
+      <v-card height="600">
         <v-col>
           <v-row
             align="center"
@@ -31,9 +29,7 @@
               persistent
               width="1200"
             >
-              <template
-                v-slot:activator="{ on }"
-              >
+              <template v-slot:activator="{ on }">
                 <v-btn
                   class="ml-10"
                   color="indigo"
@@ -61,9 +57,7 @@
                   >
                     닫기
                   </v-btn>
-                  <v-btn
-                    color="green"
-                  >
+                  <v-btn color="green">
                     설정
                   </v-btn>
                 </v-card-actions>
@@ -87,7 +81,6 @@
             justify="center"
           >
             <hue-control-tool-tip
-
               type="sat"
               :sat="currentSaturation"
               @requestChange="requestAll"
@@ -105,10 +98,7 @@
             />
           </v-row>
 
-          <v-row
-
-            justify="center"
-          >
+          <v-row justify="center">
             <v-card-actions>
               <v-spacer />
               <v-icon
@@ -157,7 +147,7 @@
       return {
         currentHSB: null,
         currentRGB: null,
-        currentPower: null,
+        currentPower: true,
         currentTemperature: 2000,
         currentSaturation: 0,
         currentBrightness: 0,
@@ -170,7 +160,6 @@
           ['#00FFFF', '#00AAAA', '#005555'],
           ['#0000FF', '#0000AA', '#000055'],
         ],
-
       }
     },
     created () {
@@ -188,6 +177,7 @@
       },
       async requestAll (type, value) {
         if (type === 'color') {
+          console.log(this.currentPower)
           const data = {
             on: this.currentPower,
             hue: this.currentHSB.hue,
@@ -197,6 +187,7 @@
           }
           await axios.put('/api/hue/changeAll', data)
         } else {
+          console.log(this.currentPower)
           const data = { on: this.currentPower, numlist: this.numlist }
           if (type) data[type] = Math.floor(value)
           await axios.put('/api/hue/changeAll', data)
@@ -208,7 +199,6 @@
         this.currentPower = !this.currentPower
         this.requestAll()
       },
-
     },
   }
 </script>

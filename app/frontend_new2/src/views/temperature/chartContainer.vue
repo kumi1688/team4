@@ -9,7 +9,12 @@
     <template v-slot:reveal-actions>
       <v-tooltip bottom>
         <template v-slot:activator="{ attrs, on }">
-          <v-btn v-bind="attrs" color="info" icon v-on="on">
+          <v-btn
+            v-bind="attrs"
+            color="info"
+            icon
+            v-on="on"
+          >
             <v-icon color="info">
               mdi-refresh
             </v-icon>
@@ -21,7 +26,12 @@
 
       <v-tooltip bottom>
         <template v-slot:activator="{ attrs, on }">
-          <v-btn v-bind="attrs" light icon v-on="on">
+          <v-btn
+            v-bind="attrs"
+            light
+            icon
+            v-on="on"
+          >
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
         </template>
@@ -35,25 +45,28 @@
     </h3>
 
     <template v-slot:actions>
-      <v-icon class="mr-1" small>
+      <v-icon
+        class="mr-1"
+        small
+      >
         mdi-clock-outline
       </v-icon>
-      <span class="caption grey--text font-weight-light"
-        >campaign sent 26 minutes ago</span
-      >
+      <span
+        class="caption grey--text font-weight-light"
+      >campaign sent 26 minutes ago</span>
     </template>
   </base-material-chart-card>
 </template>
 
 <script>
-export default {
-  created() {
-    console.log(this.data, this.options);
-  },
-  props: {
-    data: { type: Object, default: undefined },
-    options: { type: Object, default: undefined },
-    name: { type: String, default: undefined }
+  export default {
+    props: {
+      data: { type: Object, default: undefined },
+      options: { type: Object, default: undefined },
+      name: { type: String, default: undefined },
+    },
+    created () {
+      console.log(this.data, this.options)
+    },
   }
-};
 </script>

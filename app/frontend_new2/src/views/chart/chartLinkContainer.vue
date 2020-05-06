@@ -95,12 +95,8 @@
         links: {},
       }
     },
-    computed: {
-
-    },
-    watch: {
-
-    },
+    computed: {},
+    watch: {},
     async created () {
       await this.getHueStatus()
       this.initRooms()
@@ -110,15 +106,21 @@
     },
     methods: {
       dialogClose () {
+        console.log('닫기')
         this.dialog = false
         this.$emit('linkDialogClose')
       },
       initRooms () {
-        this.sortedRoomList = this.$store.state.assignInfo.roomList || { hue: {}, buzzer: {} }
+        this.sortedRoomList = this.$store.state.assignInfo.roomList || {
+          hue: {},
+          buzzer: {},
+        }
         this.roomSet = this.$store.state.rooms || []
         this.assignList = this.$store.state.assignInfo.assignList || {}
 
-        if (this.roomSet.length !== 0) this.filteredHueData = this.filterHueData()
+        if (this.roomSet.length !== 0) {
+          this.filteredHueData = this.filterHueData()
+        }
       },
       filterHueData () {
         const data = {}
@@ -131,7 +133,6 @@
             data[room] = [...data[room], idata]
           })
         })
-        console.log(data)
         return data
       },
       async getHueStatus () {
@@ -154,7 +155,6 @@
         })
         console.log('[sys] hue status 초기 설정 완료')
       },
-
     },
   }
 </script>

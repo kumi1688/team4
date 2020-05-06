@@ -90,7 +90,11 @@
     data () {
       return {
         headers: [
-          { color: 'info', title: 'Hue 배치', icon: 'mdi-folder-settings-outline' },
+          {
+            color: 'info',
+            title: 'Hue 배치',
+            icon: 'mdi-folder-settings-outline',
+          },
           { color: 'info', title: '부저 배치', icon: 'mdi-alarm-light' },
           { color: 'info', title: 'Hue 속성', icon: 'mdi-information-outline' },
           { color: 'info', title: 'Hue 사용법', icon: 'mdi-bookshelf' },
@@ -137,17 +141,21 @@
       this.$store.commit('SET_ASSIGN_INFO', {
         roomList: this.sortedRoomList,
         assignList: this.assignList,
-
       })
       this.$store.commit('SET_ROOMS', this.roomSet)
     },
     methods: {
       initRooms () {
-        this.sortedRoomList = this.$store.state.assignInfo.roomList || { hue: {}, buzzer: {} }
+        this.sortedRoomList = this.$store.state.assignInfo.roomList || {
+          hue: {},
+          buzzer: {},
+        }
         this.roomSet = this.$store.state.rooms || []
         this.assignList = this.$store.state.assignInfo.assignList || {}
 
-        if (this.roomSet.length !== 0) this.filteredHueData = this.filterHueData()
+        if (this.roomSet.length !== 0) {
+          this.filteredHueData = this.filterHueData()
+        }
       },
       filterHueData () {
         const data = {}
@@ -179,14 +187,19 @@
 
         Object.keys(arr).forEach(element => {
           arr[element] = arr[element].filter(item => item !== undefined)
-          arr[element] = arr[element].map(item => this.property[data.type].number[item])
+          arr[element] = arr[element].map(
+            item => this.property[data.type].number[item],
+          )
         })
 
         this.sortedRoomList[data.type] = arr
 
         if (data.type === 'hue') this.filteredHueData = this.filterHueData()
         console.log(this.sortedRoomList)
-        this.roomSet = new Set([...Object.keys(this.sortedRoomList.hue), ...Object.keys(this.sortedRoomList.buzzer)])
+        this.roomSet = new Set([
+          ...Object.keys(this.sortedRoomList.hue),
+          ...Object.keys(this.sortedRoomList.buzzer),
+        ])
         this.roomSet = [...this.roomSet]
       },
       closeDialog (index) {
@@ -200,16 +213,22 @@
         this.deviceList = result.data
       },
       async getDeviceProperty () {
-        const result = await Promise.all(this.deviceList.map((device) => {
-          return axios.get(`/api/${device}/property`)
-        }))
+        const result = await Promise.all(
+          this.deviceList.map(device => {
+            return axios.get(`/api/${device}/property`)
+          }),
+        )
         result.map((data, index) => {
           this.property[this.deviceList[index]] = data.data
         })
       },
       initAssignList () {
         Object.keys(this.property).map(device => {
-          if (!this.assignList[device]) this.assignList[device] = new Array(this.property[device].number.length)
+          if (!this.assignList[device]) {
+            this.assignList[device] = new Array(
+              this.property[device].number.length,
+            )
+          }
         })
       },
       async getHueStatus () {
@@ -271,8 +290,6 @@
           this.compareState(JSON.parse(data))
         })
       },
-
     },
-
   }
 </script>
