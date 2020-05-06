@@ -3,9 +3,9 @@ var app = express();
 var http = require("http").createServer(app);
 var path = require("path");
 var bodyParser = require("body-parser");
-const fs =require('fs');
+const fs = require("fs");
 var cors = require("cors");
-var dotenv = require('dotenv');
+var dotenv = require("dotenv");
 // const logger = require('fluent-logger');
 // logger.configure('team4', {
 //   host: '13.125.207.178',
@@ -20,13 +20,14 @@ const websocket = require("./socket");
 
 const hue = require("./routes/hue"); //light 라우터
 const weather = require("./routes/weather"); // weather 라우터
-const light = require('./routes/light');
-const temperature = require('./routes/temperature');
-const co = require('./routes/co');
-const gas = require('./routes/gas');
-const flame = require('./routes/flame');
-const dust = require('./routes/dust');
-const buzzer = require('./routes/buzzer');
+const light = require("./routes/light");
+const temperature = require("./routes/temperature");
+const co = require("./routes/co");
+const gas = require("./routes/gas");
+const flame = require("./routes/flame");
+const dust = require("./routes/dust");
+const buzzer = require("./routes/buzzer");
+const pir = require("./routes/pir");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
@@ -36,25 +37,35 @@ app.use(cors());
 
 app.use("/hue", hue);
 app.use("/weather", weather);
-app.use('/dust', dust);
-app.use('/co', co);
-app.use('/light', light);
-app.use('/temperature', temperature);
-app.use('/gas', gas);
-app.use('/flame', flame);
-app.use('/buzzer', buzzer);
+app.use("/dust", dust);
+app.use("/co", co);
+app.use("/light", light);
+app.use("/temperature", temperature);
+app.use("/gas", gas);
+app.use("/flame", flame);
+app.use("/buzzer", buzzer);
+app.use("/pir", pir);
 
-app.get('/sensorList', (req, res)=>{
-  const sensorList = ['dust', 'co', 'light', 'temperature', 'gas', 'flame'];
+app.get("/sensorList", (req, res) => {
+  const sensorList = [
+    "dust",
+    "co",
+    "light",
+    "temperature",
+    "gas",
+    "flame",
+    "pir",
+  ];
   res.send(sensorList);
-})
+});
 
-app.get('/deviceList', (req, res)=>{
-  const deviceList = ['hue', 'buzzer'];
+app.get("/deviceList", (req, res) => {
+  const deviceList = ["hue", "buzzer"];
   res.send(deviceList);
-})
+});
 
-var server = http.listen(process.env.basePort, function () {
+console.log(process.env.BASE_PORT);
+var server = http.listen(process.env.BASE_PORT, function () {
   console.log("Server Created...");
 });
 

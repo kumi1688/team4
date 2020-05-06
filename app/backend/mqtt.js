@@ -13,15 +13,21 @@ const subscribeList = [
   "res/weather/weather", // 현재 날씨 요청 응답
   "res/weather/dust", // 미세 먼지 요청 응답
   "req/dust",
-  'res/hue/changeStatus/+',
+  "res/hue/changeStatus/+",
   "req/temperature/status",
   "req/light/status",
-  'res/dust/update', 'res/light/update', 'res/flame/update', 'res/gas/update', 'res/temperature/update',
-  'res/co/update',
-
-  'clova/req/hue/status',
-  'clova/req/hue/changeStatus/+'
-
+  "res/dust/update",
+  "res/light/update",
+  "res/flame/update",
+  "res/gas/update",
+  "res/temperature/update",
+  "res/co/update",
+  "res/pir/update",
+  "clova/req/hue/status",
+  "clova/req/hue/changeStatus/+",
+  "pir",
+  "temperature",
+  "light",
 ];
 
 // publish 할 topic 목록
@@ -38,7 +44,11 @@ let hueProperty = {};
 
 //mqtt 연결
 const client = mqtt.connect(options);
-client.setMaxListeners(60);
+client.setMaxListeners(100);
+
+if (client.listenerCount("connect") > 1) {
+  client.removeListener("connect", client);
+}
 
 client.on("connect", () => {
   console.log("[sys] mqtt 연결됨");
@@ -51,7 +61,6 @@ client.on("disconnect", () => {
 subscribeList.forEach(function (topic) {
   client.subscribe(topic);
 });
-
 
 // 처음 로딩시 속성 요청
 client.publish("req/hue/property", "");
@@ -82,30 +91,32 @@ function requestData(pubTopic, pubMessage) {
   });
 }
 
-client.on('message', async (topic, message) => {
-    const clovaTopic = topic.split('/');
-    // console.log(topic)
-    if(clovaTopic[0] === 'clova'){
-      if(topic === 'clova/req/hue/status'){
-        const result = await requestData(clovaTopic.slice(1).join('/'));
-        const pubTopic = ['clova', 'res', ...clovaTopic.slice(2)].join('/');
-        client.publish(pubTopic, JSON.stringify(result));        
-      } else if ( topic === 'clova/req/hue/changeStatus'){
-        console.log('나는 9번이다')
-        const result = await requestData(clovaTopic.slice(1).join('/'));
-        const pubTopic = ['clova', 'res', ...clovaTopic.slice(2)].join('/');
-        client.publish(pubTopic, JSON.stringify(result));        
-      } else{
-        const data = JSON.parse(message);
-        const result = await requestData(clovaTopic.slice(1).join('/'), JSON.stringify(data));
-        const pubTopic = ['clova', 'res', ...clovaTopic.slice(2)].join('/');
-        client.publish(pubTopic, JSON.stringify(result));
-      }
-
-    } else if (topic === "res/hue/property") {
-      hueProperty = JSON.parse(message);
+client.on("message", async (topic, message) => {
+  const clovaTopic = topic.split("/");
+  // console.log(topic)
+  if (clovaTopic[0] === "clova") {
+    if (topic === "clova/req/hue/status") {
+      const result = await requestData(clovaTopic.slice(1).join("/"));
+      const pubTopic = ["clova", "res", ...clovaTopic.slice(2)].join("/");
+      client.publish(pubTopic, JSON.stringify(result));
+    } else if (topic === "clova/req/hue/changeStatus") {
+      console.log("나는 9번이다");
+      const result = await requestData(clovaTopic.slice(1).join("/"));
+      const pubTopic = ["clova", "res", ...clovaTopic.slice(2)].join("/");
+      client.publish(pubTopic, JSON.stringify(result));
+    } else {
+      const data = JSON.parse(message);
+      const result = await requestData(
+        clovaTopic.slice(1).join("/"),
+        JSON.stringify(data)
+      );
+      const pubTopic = ["clova", "res", ...clovaTopic.slice(2)].join("/");
+      client.publish(pubTopic, JSON.stringify(result));
     }
-})
+  } else if (topic === "res/hue/property") {
+    hueProperty = JSON.parse(message);
+  }
+});
 
 module.exports = {
   client,
