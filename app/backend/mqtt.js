@@ -4,6 +4,7 @@ const options = {
   port: 1883,
   protocol: "mqtt",
 };
+const fs = require('fs')
 
 // subscribe 할 topic 목록
 const subscribeList = [
@@ -28,6 +29,12 @@ const subscribeList = [
   "pir",
   "temperature",
   "light",
+  'gas',
+  'co',
+  'clova/req/room',
+  'clova/req/hueAssignInfo',
+  'clova/req/room/changeStatus',
+  'clova/req/changeHueRoom'
 ];
 
 // publish 할 topic 목록
@@ -104,7 +111,31 @@ client.on("message", async (topic, message) => {
       const result = await requestData(clovaTopic.slice(1).join("/"));
       const pubTopic = ["clova", "res", ...clovaTopic.slice(2)].join("/");
       client.publish(pubTopic, JSON.stringify(result));
-    } else {
+    } else if (topic === "clova/req/room") {
+      console.log('방을 확인합니다');
+      const result = JSON.parse(fs.readFileSync('./data/roomList.json'));
+      const pubTopic = ["clova", "res", ...clovaTopic.slice(2)].join("/");
+      client.publish(pubTopic, JSON.stringify(result));
+    } else if(topic === 'clova/req/hueAssignInfo'){
+      console.log('방에 배치된 전구를 확인합니다');
+      const room = JSON.parse(message);
+      const result = JSON.parse(fs.readFileSync('./data/deviceList.json'));
+      const pubTopic = ["clova", "res", ...clovaTopic.slice(2)].join("/");
+      const data = result.hue[room.value] ? result.hue[room.value] : []
+      client.publish(pubTopic, JSON.stringify(data));
+    } else if ( topic === 'clova/req/changeHueRoom'){
+      const result = JSON.parse(message);
+      console.log(`${result.room.value}에 배치된 전구를 ${result.on ? '켭니다':'끕니다'}`);
+      const deviceList = JSON.parse(fs.readFileSync('./data/deviceList.json'));
+      const data = {on: result.on ? true:false, numlist: deviceList.hue[result.room.value]};
+      console.log(data);
+      client.publish('req/hue/changeAllStatus', JSON.stringify(data));
+      const pubTopic = ["clova", "res", ...clovaTopic.slice(2)].join("/");
+      client.publish(pubTopic, JSON.stringify({result: 'success'}));
+    }
+    
+    
+    else {
       const data = JSON.parse(message);
       const result = await requestData(
         clovaTopic.slice(1).join("/"),

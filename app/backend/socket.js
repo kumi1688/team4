@@ -1,5 +1,6 @@
 const SocketIO = require("socket.io");
 const { client } = require("./mqtt");
+const fs = require('fs');
 
 const logger = require("fluent-logger");
 logger.configure("team4", {
@@ -75,6 +76,10 @@ module.exports = (server, app) => {
           (alert) => alert.id !== id
         );
       });
+      socket.on('saveRoom', (data)=>{
+        fs.writeFileSync('./data/roomList.json', JSON.stringify(data.roomList));
+        fs.writeFileSync('./data/deviceList.json', JSON.stringify(data.deviceList));
+      })
 
       client.on("message", (topic, message) => {
         const type = element.name.split("").slice(1).join("");
