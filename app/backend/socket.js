@@ -72,6 +72,9 @@ module.exports = (server, app) => {
       });
       socket.on("removeLink", (id) => {
         console.log("제거할 메시지 id", id);
+        alertList[sensor] = alertList.map(alert=>{
+          if(alert.id === id && alert.deviceInfo.device === 'buzzer') client.publish('BuzzerEvent', 'off');
+        })
         alertList[sensor] = alertList[sensor].filter(
           (alert) => alert.id !== id
         );
@@ -81,50 +84,88 @@ module.exports = (server, app) => {
         fs.writeFileSync('./data/deviceList.json', JSON.stringify(data.deviceList));
       })
 
+      
       client.on("message", (topic, message) => {
         const type = element.name.split("").slice(1).join("");
 
         if (topic === `res${element.name}/update`) {
-          const logData = {};
-          logData[type] = JSON.parse(message);
-          // logger.emit("team4", logData);
-          // console.log(`[sys] 웹 소켓으로 ${element.name} 업데이트`);
+          
           const data = JSON.parse(message);
-          // logger.emit(data);
+          checkAlertList(type,data);
           socket.emit("update", JSON.stringify(data));
-          alertList[sensor].forEach((alert) => {
-            if (
-              alert.condition.criteria === "이상" &&
-              data[sensor] > alert.condition.value
-            ) {
-              alert.data.map((al) =>
-                client.publish(getMqttTopic(al), setMqttData(al))
-              );
-            } else if (
-              alert.condition.criteria === "이하" &&
-              data[sensor] < alert.condition.value
-            ) {
-              alert.data.map((al) =>
-                client.publish(getMqttTopic(al), setMqttData(al))
-              );
-            }
-          });
         } else if (topic === "temperature" && type === "temperature") {
           const data = {};
           try {
-            data[type] = JSON.parse(message);
+             data[type] = JSON.parse(message);
+            checkAlertList(type,data);
+            console.log(data);
             socket.emit("update", JSON.stringify(data));
+            logger.emit('team4',{
+              'type': data});
           } catch (e) {
             data[type] = message.toString();
+            checkAlertList(type,data);
             socket.emit("update", JSON.stringify(data));
           }
         } else if (topic === "light" && type === "light") {
           const data = {};
           try {
             data[type] = JSON.parse(message);
+            
+            data.record = 'light record'
+            checkAlertList(type,data);
             socket.emit("update", JSON.stringify(data));
+            logger.emit('team4',{
+              'type': data});
+            // console.log('전송')
           } catch (e) {
             data[type] = message.toString();
+            checkAlertList(type,data);
+            socket.emit("update", JSON.stringify(data));
+          }
+        } else if (topic === "flame" && type === "flame") {
+          const data = {};
+          try {
+            data[type] = JSON.parse(message);
+            data.record = 'flame record'
+            checkAlertList(type,data);
+            socket.emit("update", JSON.stringify(data));
+            logger.emit('team4',{
+              'type': data});
+            // console.log('전송')
+          } catch (e) {
+            data[type] = message.toString();
+            checkAlertList(type,data);
+            socket.emit("update", JSON.stringify(data));
+          }
+        } else if (topic === "gas" && type === "gas") {
+          const data = {};
+          try {
+            data[type] = JSON.parse(message);
+            data.record = 'gas record'
+            checkAlertList(type,data);
+            socket.emit("update", JSON.stringify(data));
+            logger.emit('team4',{
+              'type': data});
+            // console.log('전송')
+          } catch (e) {
+            data[type] = message.toString();
+            checkAlertList(type,data);
+            socket.emit("update", JSON.stringify(data));
+          }
+        }else if (topic === "co" && type === "co") {
+          const data = {};
+          try {
+            data[type] = JSON.parse(message);
+            data.record = 'gas record'
+            checkAlertList(type,data);
+            socket.emit("update", JSON.stringify(data));
+            logger.emit('team4',{
+              'type': data});
+            // console.log('전송')
+          } catch (e) {
+            data[type] = message.toString();
+            checkAlertList(type,data);
             socket.emit("update", JSON.stringify(data));
           }
         } else if (topic === "pir" && type === "pir") {
@@ -132,13 +173,15 @@ module.exports = (server, app) => {
           try {
             data[type] = JSON.parse(message);
             data[type] = data[type] === "HIGH" ? 1 : 0;
+            checkAlertList(type,data);
             socket.emit("update", JSON.stringify(data));
           } catch (e) {
             data[type] = message.toString();
             data[type] = data[type] === "HIGH" ? 1 : 0;
+            checkAlertList(type,data);
             socket.emit("update", JSON.stringify(data));
           }
-        }
+        } 
       });
       element.on("disconnect", () => {
         console.log(`[sys] ${element.name} 네임 스페이스 연결 끊김`);
@@ -146,3 +189,24 @@ module.exports = (server, app) => {
     });
   });
 };
+
+function checkAlertList(type,data){
+
+  alertList[type].forEach((alert) => { 
+    if (
+      alert.condition.criteria === "이상" &&
+      data[type] > alert.condition.value
+    ) {
+      alert.data.map((al) =>
+        client.publish(getMqttTopic(al), setMqttData(al))
+      );
+    } else if (
+      alert.condition.criteria === "이하" &&
+      data[type] < alert.condition.value
+    ) {
+      alert.data.map((al) =>
+        client.publish(getMqttTopic(al), setMqttData(al))
+      );
+    }
+  }); 
+}
