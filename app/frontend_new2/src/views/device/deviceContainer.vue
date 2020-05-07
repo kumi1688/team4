@@ -201,6 +201,11 @@
           ...Object.keys(this.sortedRoomList.buzzer),
         ])
         this.roomSet = [...this.roomSet]
+        const socketData = {
+          roomList: this.roomSet,
+          deviceList: this.sortedRoomList,
+        }
+        socket.emit('saveRoom', socketData)
       },
       closeDialog (index) {
         this.dialog[index] = false

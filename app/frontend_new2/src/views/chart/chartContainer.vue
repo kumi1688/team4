@@ -350,8 +350,8 @@
       },
       isNewLink () {
         if (this.isNewLink) {
-          this.linkData = this.$store.state.links[this.name]
-          this.$store.commit('CHECK_NEW_LINK', false)
+          // this.linkData = this.$store.state.links[this.name]
+          // this.$store.commit('CHECK_NEW_LINK', false)
         }
       },
       rawData: {
@@ -549,6 +549,7 @@
         this.showAlert = []
       },
       linkDialogClose () {
+        this.linkData = this.$store.state.links[this.name]
         console.log('sssssss', this.linkData)
         if (this.linkData.length !== 0) {
           this.linkList = [

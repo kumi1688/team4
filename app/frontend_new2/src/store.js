@@ -54,7 +54,6 @@ export default new Vuex.Store({
       }
       state.linkData = {}
       if (!state.links[sensor]) state.links[sensor] = []
-      // if (!checkLinks(state, sensor, newLink)) return
        state.links[sensor] = [...state.links[sensor], newLink]
     },
     INIT_LINK_LIST (state) {
