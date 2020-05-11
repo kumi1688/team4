@@ -31,6 +31,7 @@ const subscribeList = [
   "light",
   'gas',
   'co',
+  'flame',
   'clova/req/room',
   'clova/req/hueAssignInfo',
   'clova/req/room/changeStatus',
@@ -51,11 +52,7 @@ let hueProperty = {};
 
 //mqtt 연결
 const client = mqtt.connect(options);
-client.setMaxListeners(100);
-
-if (client.listenerCount("connect") > 1) {
-  client.removeListener("connect", client);
-}
+client.setMaxListeners(100); // mqtt에 물릴 최대 listener 증설. 늘리지 않으면 mqtt 수신이 안 될 수 있다
 
 client.on("connect", () => {
   console.log("[sys] mqtt 연결됨");
@@ -98,44 +95,37 @@ function requestData(pubTopic, pubMessage) {
   });
 }
 
+// mqtt topic 별로 처리할 로직
 client.on("message", async (topic, message) => {
   const clovaTopic = topic.split("/");
-  // console.log(topic)
-  if (clovaTopic[0] === "clova") {
-    if (topic === "clova/req/hue/status") {
+  if (clovaTopic[0] === "clova") { // clova 서버에서 요청이 들어오는 경우
+    if (topic === "clova/req/hue/status") { // clova 서버에서 전구 1개의 상태를 확인하는 경우
       const result = await requestData(clovaTopic.slice(1).join("/"));
       const pubTopic = ["clova", "res", ...clovaTopic.slice(2)].join("/");
       client.publish(pubTopic, JSON.stringify(result));
-    } else if (topic === "clova/req/hue/changeStatus") {
-      console.log("나는 9번이다");
+    } else if (topic === "clova/req/hue/changeStatus") { // clova 서버에서 전구 1개의 상태를 변경하는 경우 
       const result = await requestData(clovaTopic.slice(1).join("/"));
       const pubTopic = ["clova", "res", ...clovaTopic.slice(2)].join("/");
       client.publish(pubTopic, JSON.stringify(result));
-    } else if (topic === "clova/req/room") {
-      console.log('방을 확인합니다');
+    } else if (topic === "clova/req/room") { // clova 서버에서 방 리스트를 요청하는 경우 
       const result = JSON.parse(fs.readFileSync('./data/roomList.json'));
       const pubTopic = ["clova", "res", ...clovaTopic.slice(2)].join("/");
       client.publish(pubTopic, JSON.stringify(result));
-    } else if(topic === 'clova/req/hueAssignInfo'){
-      console.log('방에 배치된 전구를 확인합니다');
+    } else if (topic === 'clova/req/hueAssignInfo') { // clova 서버에서 방 마다 배치된 전구의 리스트를 요청하는 경우
       const room = JSON.parse(message);
       const result = JSON.parse(fs.readFileSync('./data/deviceList.json'));
       const pubTopic = ["clova", "res", ...clovaTopic.slice(2)].join("/");
       const data = result.hue[room.value] ? result.hue[room.value] : []
       client.publish(pubTopic, JSON.stringify(data));
-    } else if ( topic === 'clova/req/changeHueRoom'){
+    } else if (topic === 'clova/req/changeHueRoom') { // clova 서버에서 방에 배치된 전체 전구 상태 변경을 요청하는 경우
       const result = JSON.parse(message);
-      console.log(`${result.room.value}에 배치된 전구를 ${result.on ? '켭니다':'끕니다'}`);
       const deviceList = JSON.parse(fs.readFileSync('./data/deviceList.json'));
-      const data = {on: result.on ? true:false, numlist: deviceList.hue[result.room.value]};
+      const data = { on: result.on ? true : false, numlist: deviceList.hue[result.room.value] };
       console.log(data);
       client.publish('req/hue/changeAllStatus', JSON.stringify(data));
       const pubTopic = ["clova", "res", ...clovaTopic.slice(2)].join("/");
-      client.publish(pubTopic, JSON.stringify({result: 'success'}));
-    }
-    
-    
-    else {
+      client.publish(pubTopic, JSON.stringify({ result: 'success' }));
+    } else { // 이 외에 일반 응답은 무의미한 요청이므로 응답메시지만 전송
       const data = JSON.parse(message);
       const result = await requestData(
         clovaTopic.slice(1).join("/"),
@@ -144,7 +134,7 @@ client.on("message", async (topic, message) => {
       const pubTopic = ["clova", "res", ...clovaTopic.slice(2)].join("/");
       client.publish(pubTopic, JSON.stringify(result));
     }
-  } else if (topic === "res/hue/property") {
+  } else if (topic === "res/hue/property") { // clova 서버가 아닌 곳에서 hue 속성을 요청하는 경우
     hueProperty = JSON.parse(message);
   }
 });
